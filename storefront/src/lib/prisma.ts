@@ -5,13 +5,10 @@ import { PrismaPg } from '@prisma/adapter-pg'
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
 const getConnectionUrl = () => {
-  let url = process.env.DATABASE_URL;
+  const url = process.env.DATABASE_URL;
   if (!url) {
-    console.error('DATABASE_URL is MISSING');
     throw new Error('DATABASE_URL is not defined in environment variables');
   }
-
-  console.log(`DATABASE_URL detected: length=${url.length}, prefix=${url.substring(0, 15)}...`);
   return url;
 };
 
