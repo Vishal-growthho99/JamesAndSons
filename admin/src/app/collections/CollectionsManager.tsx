@@ -12,7 +12,7 @@ type Category = {
   products: { id: string; name: string }[];
 };
 
-export default function CollectionsManager({ categories, allProducts }: { categories: Category[], allProducts: { id: string, name: string, sku: string }[] }) {
+export default function CategoryManager({ categories, allProducts }: { categories: Category[], allProducts: { id: string, name: string, sku: string }[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showForm, setShowForm] = useState(false);
@@ -45,8 +45,8 @@ export default function CollectionsManager({ categories, allProducts }: { catego
   };
 
   const handleDelete = (id: string, productCount: number) => {
-    if (productCount > 0) { alert(`Cannot delete: ${productCount} product(s) use this collection.`); return; }
-    if (!confirm('Delete this collection?')) return;
+    if (productCount > 0) { alert(`Cannot delete: ${productCount} product(s) use this category.`); return; }
+    if (!confirm('Delete this category?')) return;
     startTransition(async () => {
       await fetch(`/api/collections/${id}`, { method: 'DELETE' });
       router.refresh();
@@ -78,37 +78,39 @@ export default function CollectionsManager({ categories, allProducts }: { catego
   return (
     <div className="space-y-6">
       <div className="flex justify-end gap-3">
-        <button onClick={openAdd} className="btn-primary font-mono text-[10px] uppercase tracking-[0.12em] px-6 py-3">
-          + New Collection
+        <button onClick={openAdd} className="btn-primary font-mono text-[10px] uppercase tracking-[0.12em] px-8 py-4 shadow-lg shadow-accent/20">
+          + Create New Category
         </button>
       </div>
 
       {showForm && (
-        <div className="bg-surface border border-accent/30 p-6 space-y-4">
-          <h3 className="font-serif text-[20px] text-primary">{editing ? 'Edit Collection' : 'New Collection'}</h3>
+        <div className="bg-surface border border-accent/30 p-8 space-y-6 shadow-2xl">
+          <h3 className="font-serif text-[24px] text-primary">{editing ? 'Edit Category' : 'Create New Category'}</h3>
           {error && <p className="text-red-400 font-mono text-[11px]">{error}</p>}
-          <div>
-            <label className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted block mb-1">Name *</label>
-            <input value={name} onChange={e => setName(e.target.value)} className="w-full bg-background border border-border px-4 py-3 text-[14px] text-primary focus:outline-none focus:border-accent" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted block">Category Name *</label>
+              <input value={name} onChange={e => setName(e.target.value)} className="w-full bg-background border border-border px-4 py-3 text-[14px] text-primary focus:outline-none focus:border-accent" placeholder="e.g. Modern Chandeliers" />
+            </div>
+            <div className="space-y-2">
+              <label className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted block">Description (Optional)</label>
+              <input value={description} onChange={e => setDescription(e.target.value)} className="w-full bg-background border border-border px-4 py-3 text-[14px] text-primary focus:outline-none focus:border-accent" />
+            </div>
           </div>
-          <div>
-            <label className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted block mb-1">Description</label>
-            <textarea value={description} onChange={e => setDescription(e.target.value)} rows={2} className="w-full bg-background border border-border px-4 py-3 text-[14px] text-primary focus:outline-none focus:border-accent resize-none" />
-          </div>
-          <div className="flex gap-3 justify-end">
-            <button onClick={() => setShowForm(false)} className="font-mono text-[9px] uppercase tracking-widest text-muted border border-border px-5 py-2">Cancel</button>
-            <button onClick={handleSave} disabled={isPending} className="btn-primary font-mono text-[9px] uppercase tracking-widest px-5 py-2 disabled:opacity-50">
-              {isPending ? 'Saving...' : 'Save'}
+          <div className="flex gap-4 justify-end pt-4">
+            <button onClick={() => setShowForm(false)} className="font-mono text-[10px] uppercase tracking-widest text-muted border border-border px-6 py-2.5 hover:bg-surface transition-colors">Discard</button>
+            <button onClick={handleSave} disabled={isPending} className="btn-primary font-mono text-[10px] uppercase tracking-widest px-8 py-2.5 disabled:opacity-50">
+              {isPending ? 'Processing...' : 'Save Category'}
             </button>
           </div>
         </div>
       )}
 
       {managingProducts && (
-        <div className="bg-surface border border-accent/30 p-6 space-y-6">
+        <div className="bg-surface border border-accent/30 p-8 space-y-6 shadow-xl">
           <div className="flex justify-between items-center">
-            <h3 className="font-serif text-[22px] text-primary">Manage Products: <span className="text-accent">{managingProducts.name}</span></h3>
-            <button onClick={() => setManagingProducts(null)} className="font-mono text-[10px] uppercase tracking-widest text-muted">Close</button>
+            <h3 className="font-serif text-[24px] text-primary">Products in <span className="text-accent underline underline-offset-8">{managingProducts.name}</span></h3>
+            <button onClick={() => setManagingProducts(null)} className="font-mono text-[10px] uppercase tracking-widest text-muted hover:text-primary transition-colors">Close Manager</button>
           </div>
 
           <div className="space-y-4">

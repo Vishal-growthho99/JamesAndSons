@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
-import CollectionsManager from './CollectionsManager';
+import CategoryManager from './CollectionsManager';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +26,7 @@ export default async function CollectionsPage() {
           <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-muted mt-2">{categories.length} collections</p>
         </div>
       </div>
-      <CollectionsManager categories={categories as any} allProducts={allProducts} />
+      <CategoryManager categories={categories as any} allProducts={allProducts} />
     </div>
   );
 }
