@@ -5,8 +5,16 @@ import { getProducts } from '@/lib/products';
 
 export default async function Navigation() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const products = await getProducts();
+  let user = null;
+  let products: any[] = [];
+
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+    products = await getProducts();
+  } catch (error) {
+    console.error('Error in Navigation data fetching:', error);
+  }
 
   return (
     <nav>

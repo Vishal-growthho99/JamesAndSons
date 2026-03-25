@@ -11,13 +11,22 @@ import Link from 'next/link';
 export default async function ProductPage(props: { params: Promise<{ slug: string }> }) {
   const params = await props.params;
   
-  const product = await prisma.product.findUnique({
-    where: { slug: params.slug },
-    include: {
-      category: true,
-      variants: { orderBy: { createdAt: 'asc' } }
-    }
-  });
+  let product;
+  try {
+    product = await prisma.product.findUnique({
+      where: { slug: params.slug },
+      include: {
+        category: true,
+        variants: { orderBy: { createdAt: 'asc' } }
+      }
+    });
+  } catch (error) {
+    console.error(`Error fetching product with slug ${params.slug}:`, error);
+    // If an error occurs during the Prisma call, treat it as if the product was not found.
+    // The original code returns notFound() if product is null, so setting product to null
+    // here will lead to the same outcome.
+    product = null; 
+  }
 
   if (!product) return notFound();
 
