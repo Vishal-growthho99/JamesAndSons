@@ -15,7 +15,8 @@ export default function ClientLoginPage({ searchParams, referer }: Props) {
   const [accountType, setAccountType] = useState<'personal' | 'business'>('personal')
 
   let nextUrl = searchParams.next || '/'
-  if (!searchParams.next && referer && !referer.includes('/login')) {
+  const authPages = ['/login', '/forgot-password', '/update-password', '/auth']
+  if (!searchParams.next && referer && !authPages.some(page => referer.includes(page))) {
     try {
       nextUrl = new URL(referer).pathname + new URL(referer).search
     } catch {

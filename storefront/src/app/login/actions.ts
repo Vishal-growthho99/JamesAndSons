@@ -40,7 +40,7 @@ export async function signup(formData: FormData) {
     user_metadata.company_name = formData.get('companyName');
     user_metadata.contact_name = formData.get('contactName');
     user_metadata.gstin = formData.get('gstin');
-    user_metadata.is_b2b_pending = true; // B2B accounts require approval
+    user_metadata.is_b2b_pending = false; // B2B accounts are auto-approved
   }
 
   const { data, error } = await supabase.auth.signUp({
@@ -55,32 +55,43 @@ export async function signup(formData: FormData) {
     redirect(`/login?message=${error.message}&next=${encodeURIComponent(nextUrl)}`)
   }
 
-  // Sync to Prisma if business account
-  if (data && data.user && accountType === 'business') {
+  // Sync to Prisma
+  if (data?.user) {
     try {
-      const companyName = formData.get('companyName') as string;
-      const gstin = formData.get('gstin') as string;
-      
-      // Create company and user in Prisma
-      // Note: Supabase ID is used as the Prisma User ID for sync
-      await prisma.company.create({
-        data: {
-          name: companyName,
-          gstin: gstin,
-          users: {
-            create: {
-              id: data.user.id,
-              email: email,
-              firstName: formData.get('contactName') as string || 'Business', 
-              lastName: 'User',
-              password: 'SUPABASE_AUTH', // Placeholder
-              role: 'CUSTOMER',
+      if (accountType === 'business') {
+        const companyName = formData.get('companyName') as string;
+        const gstin = formData.get('gstin') as string;
+        
+        await prisma.company.create({
+          data: {
+            name: companyName,
+            gstin: gstin,
+            users: {
+              create: {
+                id: data.user.id,
+                email: email,
+                firstName: formData.get('contactName') as string || 'Business', 
+                lastName: 'User',
+                password: 'SUPABASE_AUTH',
+                role: 'B2B_BUYER', // Auto-approved
+              }
             }
           }
-        }
-      });
+        });
+      } else {
+        await prisma.user.create({
+          data: {
+            id: data.user.id,
+            email: email,
+            firstName: formData.get('firstName') as string || 'New',
+            lastName: formData.get('lastName') as string || 'User',
+            password: 'SUPABASE_AUTH',
+            role: 'CUSTOMER',
+          }
+        });
+      }
     } catch (dbError: any) {
-      console.error('Error syncing B2B signup to Prisma:', dbError);
+      console.error('Error syncing signup to Prisma:', dbError);
     }
   }
 

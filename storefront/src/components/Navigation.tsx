@@ -25,7 +25,7 @@ export default async function Navigation() {
         <li><Link href="/">Home</Link></li>
         <li><Link href="/collections">Collections</Link></li>
         <li><Link href="/blog">Blog</Link></li>
-        <li><Link href="/#spaces">Spaces</Link></li>
+        <li><a href="/#spaces">Spaces</a></li>
         <li><Link href="/b2b">B2B Portal</Link></li>
       </ul>
       <NavClient user={user} products={products} />

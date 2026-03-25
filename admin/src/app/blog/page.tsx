@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
-
+import DeleteBlogButton from './DeleteBlogButton';
 export const dynamic = 'force-dynamic';
 
 export default async function BlogAdminPage() {
@@ -46,7 +46,7 @@ export default async function BlogAdminPage() {
                 <td className="px-6 py-5 font-mono text-[12px] text-muted">{new Date(post.createdAt).toLocaleDateString()}</td>
                 <td className="px-6 py-5 text-right flex gap-4 justify-end">
                    <Link href={`/blog/${post.id}/edit`} className="font-mono text-[10px] text-accent hover:underline lowercase">Edit</Link>
-                   <button className="font-mono text-[10px] text-red-500/70 hover:text-red-500 lowercase">Delete</button>
+                   <DeleteBlogButton id={post.id} />
                 </td>
               </tr>
             ))}

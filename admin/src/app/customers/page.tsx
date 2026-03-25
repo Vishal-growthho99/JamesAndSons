@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
-
+import ExportCsvButton from './ExportCsvButton';
 export const dynamic = 'force-dynamic';
 
 export default async function CustomersPage() {
@@ -14,7 +14,11 @@ export default async function CustomersPage() {
       <div className="flex justify-between items-center bg-surface p-6 border border-border">
         <h1 className="font-serif text-[28px] font-light text-primary tracking-wide m-0">Customer Directory</h1>
         <div className="flex gap-4">
-          <button className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted border border-border px-6 py-2.5 hover:bg-surface-muted hover:text-primary transition-colors bg-background">Export CSV</button>
+          <ExportCsvButton 
+            data={users} 
+            filename="james-and-sons-customers" 
+            className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted border border-border px-6 py-2.5 hover:bg-surface-muted hover:text-primary transition-colors bg-background" 
+          />
         </div>
       </div>
 

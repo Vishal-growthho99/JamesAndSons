@@ -18,7 +18,7 @@ export default async function ProductsPage() {
       <div className="flex justify-between items-center bg-surface p-6 border border-border">
         <h1 className="font-serif text-[28px] font-light text-primary tracking-wide m-0">Catalog &amp; Pricing</h1>
         <div className="flex gap-4">
-          <button className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted border border-border px-6 py-2.5 hover:bg-surface-muted hover:text-primary transition-colors bg-background">Import CSV</button>
+          <Link href="/products/import" className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted border border-border px-6 py-2.5 hover:bg-surface-muted hover:text-primary transition-colors bg-background flex items-center">Import CSV</Link>
           <Link href="/products/add" className="btn-primary flex items-center">Add Product</Link>
         </div>
       </div>
