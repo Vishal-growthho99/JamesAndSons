@@ -17,11 +17,7 @@ if (!supabaseUrl || !supabaseServiceKey || !databaseUrl) {
   process.exit(1);
 }
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoConfirmEmail: true,
-  }
-});
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 async function main() {
   const email = 'admin@jamesandsons.in';
