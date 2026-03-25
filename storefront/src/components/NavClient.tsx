@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useCartStore } from '@/store/cart';
 import CartDrawer from './CartDrawer';
 import SearchModal from './SearchModal';
+import MobileMenu from './MobileMenu';
 import { useRouter } from 'next/navigation';
 import { Product } from '@/lib/utils';
 
@@ -48,6 +49,8 @@ export default function NavClient({ user, products }: { user: { id: string; emai
             </span>
           )}
         </button>
+        
+        <MobileMenu />
       </div>
 
       <CartDrawer />
