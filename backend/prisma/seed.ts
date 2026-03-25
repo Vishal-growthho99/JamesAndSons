@@ -162,7 +162,7 @@ async function main() {
   }
 
   const dbCategories = await prisma.category.findMany();
-  const categoryMap = new Map(dbCategories.map((c) => [c.name, c.id]));
+  const categoryMap = new Map(dbCategories.map((c: any) => [c.name, c.id]));
 
   // Create Products
   for (const prod of PRODUCTS) {
