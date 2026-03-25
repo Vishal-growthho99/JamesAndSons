@@ -10,10 +10,18 @@ export async function POST(req: NextRequest) {
   let success = 0;
   let failed = 0;
 
-  for (const row of rows) {
-    try {
-      const category = await prisma.category.findFirst({ where: { slug: row.categorySlug || '' } });
-      if (!category) { failed++; continue; }
+    for (const row of rows) {
+      try {
+        const catSlug = (row.categorySlug || '').toLowerCase().trim();
+        const category = await prisma.category.findFirst({ 
+          where: { 
+            OR: [
+              { slug: catSlug },
+              { name: { equals: row.categorySlug || '', mode: 'insensitive' } }
+            ]
+          } 
+        });
+        if (!category) { failed++; continue; }
 
       let slug = generateSlug(row.name);
       const existing = await prisma.product.findUnique({ where: { slug } });
@@ -30,7 +38,7 @@ export async function POST(req: NextRequest) {
           b2bPrice: parseFloat(row.b2bPrice) || 0,
           stockQuantity: parseInt(row.stockQuantity, 10) || 0,
           categoryId: category.id,
-          images: [],
+          images: row.image ? [row.image] : [],
         },
       });
       success++;

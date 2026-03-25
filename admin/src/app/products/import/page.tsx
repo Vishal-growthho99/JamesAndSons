@@ -8,11 +8,19 @@ export default function CSVImportPage() {
   const [error, setError] = useState('');
 
   function parseCSV(text: string): any[] {
-    const lines = text.trim().split('\n');
-    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+    const lines = text.trim().split(/\r?\n/);
+    if (!lines.length) return [];
+
+    // Improved regex to handle quoted fields and commas
+    const regex = /(".*?"|[^",\s]+)(?=\s*,|\s*$)/g;
+    const headers = (lines[0].match(regex) || []).map(h => h.trim().replace(/^"|"$/g, ''));
+    
     return lines.slice(1).map(line => {
-      const vals = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
-      return headers.reduce((obj: any, h, i) => { obj[h] = vals[i] || ''; return obj; }, {});
+      const vals = (line.match(regex) || []).map(v => v.trim().replace(/^"|"$/g, ''));
+      return headers.reduce((obj: any, h, i) => {
+        obj[h] = vals[i] || '';
+        return obj;
+      }, {});
     });
   }
 
