@@ -30,7 +30,7 @@ export default async function RFQsPage() {
         </div>
       </div>
 
-      <div className="bg-surface border border-border overflow-hidden">
+      <div className="table-responsive">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-border bg-[#16161a]">

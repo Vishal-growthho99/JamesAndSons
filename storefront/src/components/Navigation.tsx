@@ -18,7 +18,7 @@ export default async function Navigation() {
   }
 
   return (
-    <nav>
+    <nav className="main-nav">
       <MobileMenu user={user} />
       <Link href="/" className="nav-logo" style={{ textDecoration: 'none', whiteSpace: 'nowrap' }}>
         James <span>&amp;</span> Sons

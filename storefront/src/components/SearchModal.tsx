@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation';
 import { Product, formatPrice } from '@/lib/utils';
 import Link from 'next/link';
 
+import { createPortal } from 'react-dom';
+
 type Props = { products: Product[], onClose: () => void };
 
 function useDebounce(value: string, delay: number) {
@@ -19,13 +21,20 @@ export default function SearchModal({ products, onClose }: Props) {
   const [query, setQuery] = useState('');
   const debouncedQuery = useDebounce(query, 200);
   const inputRef = useRef<HTMLInputElement>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    inputRef.current?.focus();
+    setMounted(true);
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
+
+  useEffect(() => {
+    if (mounted) {
+      inputRef.current?.focus();
+    }
+  }, [mounted]);
 
   const results = debouncedQuery.trim().length < 2 ? [] : products.filter(p =>
     p.name.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
@@ -34,13 +43,15 @@ export default function SearchModal({ products, onClose }: Props) {
     p.spaces.some(s => s.toLowerCase().includes(debouncedQuery.toLowerCase()))
   );
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <>
       {/* Backdrop */}
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 300, backdropFilter: 'blur(6px)' }} />
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', zIndex: 9998, backdropFilter: 'blur(6px)' }} />
 
       {/* Modal */}
-      <div style={{ position: 'fixed', top: '80px', left: '50%', transform: 'translateX(-50%)', width: '640px', maxWidth: 'calc(100vw - 40px)', background: 'var(--void)', border: '1px solid var(--border-gold)', zIndex: 301, boxShadow: '0 32px 80px rgba(0,0,0,0.6)' }}>
+      <div style={{ position: 'fixed', top: '80px', left: '50%', transform: 'translateX(-50%)', width: '640px', maxWidth: 'calc(100vw - 40px)', background: 'var(--void)', border: '1px solid var(--border-gold)', zIndex: 10000, boxShadow: '0 32px 80px rgba(0,0,0,0.6)' }}>
         {/* Input */}
         <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid var(--border)', padding: '0 20px' }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" style={{ flexShrink: 0 }}>
@@ -111,6 +122,7 @@ export default function SearchModal({ products, onClose }: Props) {
           </div>
         )}
       </div>
-    </>
+    </>,
+    document.body
   );
 }

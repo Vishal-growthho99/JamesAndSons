@@ -47,7 +47,7 @@ export default function TicketsInbox({ tickets }: { tickets: Ticket[] }) {
   };
 
   return (
-    <div className="bg-surface border border-border overflow-hidden">
+    <div className="table-responsive">
       <table className="w-full text-left">
         <thead className="border-b border-border bg-surface-muted">
           <tr>

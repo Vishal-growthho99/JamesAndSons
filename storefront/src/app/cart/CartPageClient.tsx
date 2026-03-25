@@ -21,7 +21,7 @@ export default function CartPageClient() {
 
   if (items.length === 0) {
     return (
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '80px 40px', textAlign: 'center' }}>
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: 'clamp(40px, 8vw, 80px) clamp(20px, 4vw, 40px)', textAlign: 'center' }}>
         <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'var(--surface)', margin: '0 auto 32px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed var(--border-gold)' }}>
           <span style={{ fontSize: '32px', color: 'var(--gold)' }}>🛍</span>
         </div>
@@ -50,7 +50,7 @@ export default function CartPageClient() {
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+        <div className="cart-items-desktop">
           {items.map(item => (
             <div key={item.product.id} className="cart-item-grid" style={{ alignItems: 'center', paddingBottom: '32px', borderBottom: '1px solid var(--border)' }}>
               {/* Product Info */}
@@ -79,10 +79,10 @@ export default function CartPageClient() {
               </div>
 
               {/* Quantity */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 'fit-content', border: '1px solid var(--border)', background: 'var(--surface)' }}>
-                <button onClick={() => updateQty(item.product.id, item.quantity - 1)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', width: '36px', height: '36px', cursor: 'pointer', fontSize: '16px', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = 'var(--gold)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>−</button>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', color: 'var(--text)', width: '32px', textAlign: 'center' }}>{item.quantity}</span>
-                <button onClick={() => updateQty(item.product.id, item.quantity + 1)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', width: '36px', height: '36px', cursor: 'pointer', fontSize: '16px', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = 'var(--gold)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>+</button>
+              <div className="qty-stepper">
+                <button onClick={() => updateQty(item.product.id, item.quantity - 1)}>−</button>
+                <span>{item.quantity}</span>
+                <button onClick={() => updateQty(item.product.id, item.quantity + 1)}>+</button>
               </div>
 
               {/* Total */}
@@ -92,33 +92,61 @@ export default function CartPageClient() {
             </div>
           ))}
         </div>
+
+        <div className="cart-items-mobile">
+          {items.map(item => (
+            <div key={item.product.id} className="cart-mobile-card">
+              <Link href={`/products/${item.product.slug}`} className="cart-card-image">
+                <svg width="40" height="50" viewBox="0 0 100 120" stroke="var(--gold)" fill="none">
+                  <path d="M20 70 Q50 30 80 70" strokeWidth="2" opacity="0.7"/>
+                  <circle cx="50" cy="95" r="4" fill="var(--gold-light)" stroke="none"/>
+                </svg>
+              </Link>
+              <div className="cart-card-info">
+                <div className="cart-card-header">
+                  <span className="cart-card-coll">{item.product.collection}</span>
+                  <button onClick={() => removeItem(item.product.id)} className="cart-card-remove">✕</button>
+                </div>
+                <Link href={`/products/${item.product.slug}`} className="cart-card-name">{item.product.name}</Link>
+                <div className="cart-card-footer">
+                  <div className="qty-stepper">
+                    <button onClick={() => updateQty(item.product.id, item.quantity - 1)}>−</button>
+                    <span>{item.quantity}</span>
+                    <button onClick={() => updateQty(item.product.id, item.quantity + 1)}>+</button>
+                  </div>
+                  <div className="cart-card-price">{formatPrice(item.product.d2cPrice * item.quantity)}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Summary */}
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', padding: '32px', position: 'sticky', top: '96px' }}>
-        <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', fontWeight: 300, color: 'var(--cream)', marginBottom: '24px', borderBottom: '1px solid var(--border)', paddingBottom: '16px' }}>Order Summary</h3>
+      <div className="cart-summary-container">
+        <h3 className="cart-summary-title">Order Summary</h3>
         
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>
-            <span>Subtotal</span><span style={{ color: 'var(--text)' }}>{formatPrice(subtotal)}</span>
+        <div className="cart-summary-rows">
+          <div className="cart-summary-row">
+            <span>Subtotal</span><span>{formatPrice(subtotal)}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>
-            <span>Estimated GST (18%)</span><span style={{ color: 'var(--text)' }}>{formatPrice(gst)}</span>
+          <div className="cart-summary-row">
+            <span>Estimated GST (18%)</span><span>{formatPrice(gst)}</span>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.05em', color: 'var(--text-muted)' }}>
-            <span>Shipping</span><span style={{ color: shipping === 0 ? 'var(--green)' : 'var(--text)' }}>{shipping === 0 ? 'Complimentary' : formatPrice(shipping)}</span>
+          <div className="cart-summary-row">
+            <span>Shipping</span><span className={shipping === 0 ? 'text-green' : ''}>{shipping === 0 ? 'Complimentary' : formatPrice(shipping)}</span>
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', paddingTop: '20px', borderTop: '1px solid var(--border)', marginBottom: '32px' }}>
-          <span style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', fontWeight: 300, color: 'var(--cream)' }}>Total</span>
-          <span style={{ fontFamily: 'var(--font-serif)', fontSize: '28px', fontWeight: 400, color: 'var(--gold)' }}>{formatPrice(grandTotal)}</span>
+        <div className="cart-summary-total">
+          <span>Total</span>
+          <span className="text-gold">{formatPrice(grandTotal)}</span>
         </div>
 
-        <Link href="/checkout" className="btn-primary" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', textDecoration: 'none', letterSpacing: '0.15em', width: '100%', marginBottom: '16px' }}>
+        <Link href="/checkout" className="btn-primary cart-checkout-btn">
           Proceed to Checkout
         </Link>
-        <Link href="/collections" className="btn-outline" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', textDecoration: 'none', letterSpacing: '0.15em', width: '100%' }}>
+        <Link href="/collections" className="btn-outline cart-continue-btn">
           Continue Shopping
         </Link>
       </div>

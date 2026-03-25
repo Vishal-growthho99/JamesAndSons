@@ -11,7 +11,7 @@ export default function AccountPage() {
       <div className="bg-surface border border-border shadow-sm p-8">
         <h2 className="font-serif text-[20px] text-primary mb-6">Profile Information</h2>
         
-        <div className="grid grid-cols-2 gap-8 max-w-2xl">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-2xl">
           <div className="space-y-2">
             <label className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted block">Full Name</label>
             <input type="text" defaultValue="Super Admin" className="w-full bg-background border border-border px-4 py-3 text-primary font-body text-[14px] focus:outline-none focus:border-accent" disabled />

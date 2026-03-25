@@ -44,7 +44,7 @@ export default async function ProductsPage() {
           </select>
         </div>
 
-        <div className="flex-1 overflow-x-auto">
+        <div className="flex-1 table-responsive">
           <table className="w-full text-left">
             <thead className="bg-background/50 border-b border-border">
               <tr>

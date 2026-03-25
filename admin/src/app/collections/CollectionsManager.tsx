@@ -140,7 +140,7 @@ export default function CategoryManager({ categories, allProducts }: { categorie
               </button>
             </div>
 
-            <div className="border border-border">
+            <div className="table-responsive border border-border">
               <table className="w-full text-left">
                 <thead className="bg-[#16161a] border-b border-border">
                   <tr>
@@ -172,7 +172,7 @@ export default function CategoryManager({ categories, allProducts }: { categorie
         </div>
       )}
 
-      <div className="bg-surface border border-border overflow-hidden">
+      <div className="table-responsive">
         <table className="w-full text-left">
           <thead className="border-b border-border">
             <tr>

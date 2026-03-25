@@ -16,7 +16,10 @@ export default function ClientLoginPage({ searchParams, referer }: Props) {
 
   let nextUrl = searchParams.next || '/'
   const authPages = ['/login', '/forgot-password', '/update-password', '/auth']
-  if (!searchParams.next && referer && !authPages.some(page => referer.includes(page))) {
+  
+  if (authPages.some(page => nextUrl.includes(page))) {
+    nextUrl = '/'
+  } else if (!searchParams.next && referer && !authPages.some(page => referer.includes(page))) {
     try {
       nextUrl = new URL(referer).pathname + new URL(referer).search
     } catch {

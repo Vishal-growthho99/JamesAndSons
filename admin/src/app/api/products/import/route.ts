@@ -21,7 +21,11 @@ export async function POST(req: NextRequest) {
             ]
           } 
         });
-        if (!category) { failed++; continue; }
+        if (!category) { 
+          console.warn(`CSV Import: Category '${row.categorySlug}' not found. Skipping product: ${row.name}`);
+          failed++; 
+          continue; 
+        }
 
       let slug = generateSlug(row.name);
       const existing = await prisma.product.findUnique({ where: { slug } });
@@ -42,7 +46,8 @@ export async function POST(req: NextRequest) {
         },
       });
       success++;
-    } catch {
+    } catch (err: any) {
+      console.error(`CSV Import Error for product '${row.name}':`, err.message);
       failed++;
     }
   }

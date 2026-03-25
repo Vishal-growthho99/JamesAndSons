@@ -64,7 +64,7 @@ export default async function Dashboard() {
             <h3 className="font-serif text-[22px] text-primary font-light">Recent Orders</h3>
             <Link href="/orders" className="font-mono text-[10px] uppercase tracking-[0.15em] text-accent hover:text-accent-hover transition-colors">View All</Link>
           </div>
-          <div className="flex-1 overflow-x-auto">
+          <div className="flex-1 table-responsive">
             <table className="w-full text-left">
               <thead className="bg-background/50">
                 <tr>

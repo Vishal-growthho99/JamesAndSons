@@ -4,13 +4,40 @@ export default function ExportCsvButton({ data, filename, className }: { data: a
   const handleExport = () => {
     if (data.length === 0) return;
     
-    // Extract headers from the first object
-    const headers = Object.keys(data[0]);
+    // Helper to flatten nested objects and arrays into string values
+    const flattenObject = (ob: any): any => {
+      let result: any = {};
+      for (const i in ob) {
+        if ((typeof ob[i]) === 'object' && ob[i] !== null) {
+          if (Array.isArray(ob[i])) {
+            result[i] = ob[i].map((item: any) => typeof item === 'object' ? JSON.stringify(item) : item).join(' | ');
+          } else if (ob[i] instanceof Date) {
+            result[i] = ob[i].toISOString();
+          } else {
+            const flatObject = flattenObject(ob[i]);
+            for (const x in flatObject) {
+              result[`${i}.${x}`] = flatObject[x];
+            }
+          }
+        } else {
+          result[i] = ob[i];
+        }
+      }
+      return result;
+    };
+
+    const flattenedData = data.map(flattenObject);
+    
+    // Get all unique keys across all objects to ensure no headers are missed
+    const allKeys = new Set<string>();
+    flattenedData.forEach(obj => Object.keys(obj).forEach(key => allKeys.add(key)));
+    const headers = Array.from(allKeys);
     
     // Create CSV rows
-    const rows = data.map(obj => 
+    const rows = flattenedData.map(obj => 
       headers.map(header => {
-        const val = obj[header] === null || obj[header] === undefined ? '' : obj[header];
+        const val = obj[header];
+        if (val === null || val === undefined) return '';
         // Handle commas/quotes in strings
         return typeof val === 'string' ? `"${val.replace(/"/g, '""')}"` : val;
       }).join(',')

@@ -19,7 +19,7 @@ export default async function BlogAdminPage() {
         <Link href="/blog/new" className="btn-primary">+ New Post</Link>
       </div>
 
-      <div className="bg-surface border border-border overflow-hidden">
+      <div className="table-responsive">
         <table className="w-full text-left">
           <thead className="bg-[#16161a] border-b border-border">
             <tr>

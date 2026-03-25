@@ -92,6 +92,11 @@ export async function signup(formData: FormData) {
       }
     } catch (dbError: any) {
       console.error('Error syncing signup to Prisma:', dbError);
+      
+      // Cleanup Supabase user so they aren't stuck halfway
+      await supabase.auth.admin?.deleteUser(data.user.id).catch(e => console.error("Could not rollback auth:", e));
+
+      redirect(`/login?message=Failed to setup account database. Please try again or contact support.&next=${encodeURIComponent(nextUrl)}`)
     }
   }
 

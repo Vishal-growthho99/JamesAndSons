@@ -29,7 +29,7 @@ export async function applyForB2B(formData: FormData) {
         company_name: companyName,
         contact_name: contactName,
         gstin: gstin,
-        is_b2b_pending: true
+        is_b2b_pending: false // Auto-approved
       }
     })
 
@@ -42,7 +42,12 @@ export async function applyForB2B(formData: FormData) {
     })
 
     if (existingUser) {
-      // User exists, create company and link
+      // User exists, create company and link, and upgrade role to B2B_BUYER
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { role: 'B2B_BUYER' }
+      })
+      
       const company = await prisma.company.create({
         data: {
           name: companyName,
@@ -67,7 +72,7 @@ export async function applyForB2B(formData: FormData) {
               firstName: contactName.split(' ')[0],
               lastName: contactName.split(' ').slice(1).join(' ') || '',
               password: 'SUPABASE_AUTH',
-              role: 'CUSTOMER'
+              role: 'B2B_BUYER'
             }
           }
         }

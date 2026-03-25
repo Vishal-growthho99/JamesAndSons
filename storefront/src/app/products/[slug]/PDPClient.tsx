@@ -48,20 +48,16 @@ export default function PDPClient({ product, variants }: { product: any; variant
       <div className="pdp-gallery" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
         
         {/* Gallery */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className="pdp-gallery-container">
           {activeImages.length > 0 ? (
-            <div style={{
-              width: '100%', aspectRatio: '4/3', background: 'var(--void)',
-              border: '1px solid var(--border)', overflow: 'hidden', position: 'relative'
-            }}>
+            <div className="pdp-main-image">
               <img
                 src={activeImages[activeImg]}
                 alt={product.name}
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
             </div>
           ) : (
-            <div style={{ width: '100%', aspectRatio: '4/3', background: 'var(--void)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="pdp-main-image pdp-placeholder">
               <svg width="120" height="160" viewBox="0 0 100 120" stroke="#C4A05A" fill="none">
                 <path d="M50 10 L50 40" strokeWidth="1" strokeDasharray="3 3"/>
                 <path d="M20 70 Q50 30 80 70" strokeWidth="2" opacity="0.7"/>
@@ -71,18 +67,14 @@ export default function PDPClient({ product, variants }: { product: any; variant
           )}
           
           {activeImages.length > 1 && (
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <div className="pdp-thumbnails">
               {activeImages.map((img: string, i: number) => (
                 <button
                   key={i}
                   onClick={() => setActiveImg(i)}
-                  style={{
-                    width: '80px', height: '80px', padding: 0, cursor: 'pointer', background: 'var(--void)',
-                    border: `1px solid ${i === activeImg ? 'var(--gold)' : 'var(--border)'}`,
-                    overflow: 'hidden', transition: 'border-color 0.2s'
-                  }}
+                  className={i === activeImg ? 'pdp-thumb active' : 'pdp-thumb'}
                 >
-                  <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={img} alt="" />
                 </button>
               ))}
             </div>
@@ -197,11 +189,10 @@ export default function PDPClient({ product, variants }: { product: any; variant
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div className="pdp-actions">
             <button
               className="btn-primary"
               onClick={handleAddToCart}
-              style={{ flex: 1, padding: '16px 24px', letterSpacing: '0.15em', transition: 'all 0.2s' }}
               disabled={availableStock === 0}
             >
               {availableStock === 0 ? 'Made to Order' : added ? '✓ Added to Cart' : 'Add to Cart'}
@@ -209,7 +200,6 @@ export default function PDPClient({ product, variants }: { product: any; variant
             <button
               className="btn-outline"
               onClick={() => router.push(`/rfq?product=${product.slug}`)}
-              style={{ padding: '16px 24px', letterSpacing: '0.12em' }}
             >
               Request Quote
             </button>
@@ -227,18 +217,20 @@ export default function PDPClient({ product, variants }: { product: any; variant
 
         {/* Dynamic Specs Table */}
         {product.specs && typeof product.specs === 'object' && Object.keys(product.specs).length > 0 && (
-          <div style={{ marginTop: '36px', borderTop: '1px solid var(--border)', paddingTop: '28px' }}>
-            <div className="section-label" style={{ marginBottom: '16px' }}>Technical Specifications</div>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <tbody>
-                {Object.entries(product.specs as Record<string, string>).map(([key, value]) => (
-                  <tr key={key} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-muted)', padding: '10px 0', width: '45%' }}>{key}</td>
-                    <td style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--text)', padding: '10px 0' }}>{value}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="pdp-specs">
+            <div className="section-label">Technical Specifications</div>
+            <div className="pdp-specs-table-wrapper">
+              <table>
+                <tbody>
+                  {Object.entries(product.specs as Record<string, string>).map(([key, value]) => (
+                    <tr key={key}>
+                      <td className="pdp-spec-key">{key}</td>
+                      <td className="pdp-spec-val">{value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 

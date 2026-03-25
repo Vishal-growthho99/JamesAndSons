@@ -24,10 +24,10 @@ export default function ApplyB2BForm({ userEmail }: { userEmail: string }) {
 
   if (success) {
     return (
-      <div style={{ padding: '40px', background: 'rgba(196,160,90,0.05)', border: '1px solid var(--border-gold)', textAlign: 'center' }}>
-        <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', color: 'var(--cream)', marginBottom: '12px' }}>Application Submitted</h3>
+      <div style={{ padding: '40px', background: 'rgba(90,196,120,0.05)', border: '1px solid var(--green)', textAlign: 'center' }}>
+        <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '24px', color: 'var(--cream)', marginBottom: '12px' }}>Welcome to the Trade Programme</h3>
         <p style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.7 }}>
-          Thank you for applying. Our trade team will review your details and get back to you within 24 hours.
+          Your B2B account has been activated. You can now access exclusive trade pricing and submit RFQs from your account dashboard.
         </p>
       </div>
     )

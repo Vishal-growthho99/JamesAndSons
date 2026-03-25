@@ -69,7 +69,7 @@ export default function ManageAdminsClient({ admins }: { admins: AdminUser[] }) 
         <div className="bg-surface border border-accent/30 p-8 space-y-6">
           <h2 className="font-serif text-[20px] text-primary">Invite Administrator</h2>
           
-          <form onSubmit={handleInvite} className="grid grid-cols-2 gap-6">
+          <form onSubmit={handleInvite} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted block mb-2">First Name *</label>
               <input required name="firstName" className="w-full bg-background border border-border px-4 py-3 text-[14px] text-primary focus:outline-none focus:border-accent" />
@@ -106,7 +106,7 @@ export default function ManageAdminsClient({ admins }: { admins: AdminUser[] }) 
       )}
 
       {/* Admins Table */}
-      <div className="bg-surface border border-border overflow-hidden">
+      <div className="table-responsive">
         <table className="w-full text-left">
           <thead className="border-b border-border bg-[#1a1a1f]">
             <tr>

@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import ExportCsvButton from './ExportCsvButton';
+import SyncButton from './SyncButton';
 export const dynamic = 'force-dynamic';
 
 export default async function CustomersPage() {
@@ -14,6 +15,7 @@ export default async function CustomersPage() {
       <div className="flex justify-between items-center bg-surface p-6 border border-border">
         <h1 className="font-serif text-[28px] font-light text-primary tracking-wide m-0">Customer Directory</h1>
         <div className="flex gap-4">
+          <SyncButton />
           <ExportCsvButton 
             data={users} 
             filename="james-and-sons-customers" 
@@ -22,7 +24,7 @@ export default async function CustomersPage() {
         </div>
       </div>
 
-      <div className="bg-surface border border-border overflow-hidden shadow-sm">
+      <div className="table-responsive">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-border bg-[#16161a]">
