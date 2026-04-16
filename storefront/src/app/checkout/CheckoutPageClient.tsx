@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useCartStore } from '@/store/cart';
 import { formatPrice } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
-import { createOrder } from './actions';
+import { createOrder, verifyPayment, validatePincodeDelivery } from './actions';
 
 export default function CheckoutPageInner() {
   const { items, total, clearCart } = useCartStore();
@@ -45,16 +45,66 @@ export default function CheckoutPageInner() {
         gst,
         shipping
       );
-      if (result.success && result.orderNumber) {
-        setOrderNumber(result.orderNumber);
-        clearCart();
-        setStep(3);
-      } else {
-        setOrderError(result.error || 'Order failed. Please try again.');
+      
+      if (!result.success || !result.razorpayOrderId) {
+        setOrderError(result.error || 'Failed to initialize payment gateway.');
+        setLoading(false);
+        return;
       }
+
+      const options = {
+        key: result.key,
+        amount: result.amount,
+        currency: result.currency,
+        name: 'James & Sons',
+        description: `Order ${result.orderNumber}`,
+        order_id: result.razorpayOrderId,
+        handler: async function (response: any) {
+          try {
+            const verifyRes = await verifyPayment(
+              response.razorpay_order_id,
+              response.razorpay_payment_id,
+              response.razorpay_signature,
+              result.orderId!
+            );
+            if (verifyRes.success) {
+              setOrderNumber(result.orderNumber!);
+              clearCart();
+              setStep(3); // Show Success Screen
+            } else {
+              setOrderError(verifyRes.error || 'Payment signature verification failed.');
+              setLoading(false);
+            }
+          } catch (err) {
+            setOrderError('Failed to verify payment. Please contact support.');
+            setLoading(false);
+          }
+        },
+        prefill: {
+          name: form.name,
+          email: form.email,
+          contact: form.phone,
+        },
+        theme: {
+          color: '#C4A05A',
+        },
+        modal: {
+          ondismiss: function() {
+            setOrderError('Payment cancelled.');
+            setLoading(false);
+          }
+        }
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on('payment.failed', function (response: any) {
+        setOrderError(response.error.description || 'Payment Failed');
+        setLoading(false);
+      });
+      rzp.open();
+
     } catch (e) {
       setOrderError('Unexpected error. Please try again.');
-    } finally {
       setLoading(false);
     }
   };
@@ -131,18 +181,33 @@ export default function CheckoutPageInner() {
               ))}
             </div>
             <button 
-              onClick={() => {
+              onClick={async () => {
                 if (!form.name || !form.email || !form.phone || !form.address || !form.city || !form.state || !form.pincode) {
                   setOrderError('Please fill in all delivery details before continuing.');
                   return;
                 }
+                
+                // Validate Pincode with Shiprocket
                 setOrderError('');
-                setStep(2);
+                setLoading(true);
+                try {
+                  const check = await validatePincodeDelivery(form.pincode);
+                  if (check.serviceable) {
+                    setStep(2);
+                  } else {
+                    setOrderError(`Sorry, we currently do not deliver to pincode ${form.pincode}.`);
+                  }
+                } catch (e) {
+                  setOrderError('Unable to verify delivery pincode at this time.');
+                } finally {
+                  setLoading(false);
+                }
               }} 
+              disabled={loading}
               className="btn-primary" 
-              style={{ marginTop: '24px', padding: '14px 32px', letterSpacing: '0.15em', width: '100%', whiteSpace: 'nowrap' }}
+              style={{ marginTop: '24px', padding: '14px 32px', letterSpacing: '0.15em', width: '100%', whiteSpace: 'nowrap', opacity: loading ? 0.7 : 1 }}
             >
-              Continue to Payment →
+              {loading ? 'Verifying Area...' : 'Continue to Payment →'}
             </button>
           </div>
         )}

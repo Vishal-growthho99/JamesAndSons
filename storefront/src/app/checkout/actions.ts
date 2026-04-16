@@ -23,6 +23,8 @@ type CheckoutForm = {
   pincode: string;
 };
 
+import { createRazorpayOrder } from '@/lib/razorpay';
+
 export async function createOrder(
   form: CheckoutForm,
   cartItems: CartItem[],
@@ -31,17 +33,15 @@ export async function createOrder(
   shipping: number
 ) {
   try {
-    // Try to find an existing user by email, or use a guest placeholder
     let user = await prisma.user.findUnique({ where: { email: form.email } });
 
     if (!user) {
-      // Create a lightweight guest user record for order tracking
       user = await prisma.user.create({
         data: {
           email: form.email,
           firstName: form.name.split(' ')[0] || form.name,
           lastName: form.name.split(' ').slice(1).join(' ') || '',
-          password: 'guest', // Not used for auth, just satisfies the schema
+          password: 'guest',
           phone: form.phone,
           role: 'CUSTOMER',
         },
@@ -50,13 +50,15 @@ export async function createOrder(
 
     const shippingAddress = `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`;
     const orderNumber = `JNS-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 100)}`;
+    const totalAmount = subtotal + gst + shipping;
 
+    // 1. Create order as PENDING
     const order = await prisma.order.create({
       data: {
         orderNumber,
         userId: user.id,
-        status: 'PAID',
-        totalAmount: subtotal + gst + shipping,
+        status: 'PENDING',
+        totalAmount,
         taxAmount: gst,
         shippingAmount: shipping,
         shippingAddress,
@@ -72,9 +74,71 @@ export async function createOrder(
       },
     });
 
-    return { success: true, orderNumber: order.orderNumber, orderId: order.id };
+    // 2. Generate Razorpay Order
+    const rpOrder = await createRazorpayOrder(totalAmount * 100, order.id);
+
+    // 3. Link Razorpay Order to Prisma
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { razorpayOrderId: rpOrder.id },
+    });
+
+    return { 
+      success: true, 
+      orderNumber: order.orderNumber, 
+      orderId: order.id,
+      razorpayOrderId: rpOrder.id,
+      amount: rpOrder.amount,
+      currency: rpOrder.currency,
+      key: process.env.RAZORPAY_KEY_ID
+    };
   } catch (error: any) {
     console.error('Order creation error:', error);
     return { success: false, error: error.message };
   }
+}
+
+import crypto from 'crypto';
+
+export async function verifyPayment(
+  razorpayOrderId: string,
+  razorpayPaymentId: string,
+  razorpaySignature: string,
+  internalOrderId: string
+) {
+  try {
+    const secret = process.env.RAZORPAY_KEY_SECRET || '';
+    const generatedSignature = crypto
+      .createHmac('sha256', secret)
+      .update(`${razorpayOrderId}|${razorpayPaymentId}`)
+      .digest('hex');
+
+    if (generatedSignature !== razorpaySignature) {
+      throw new Error('Invalid payment signature');
+    }
+
+    await prisma.order.update({
+      where: { id: internalOrderId },
+      data: {
+        status: 'PAID',
+        razorpayPaymentId,
+        razorpaySignature,
+      },
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Payment verification failed:', error);
+    return { success: false, error: error.message };
+  }
+  }
+}
+
+import { checkPincodeServiceability } from '@/lib/shiprocket';
+
+export async function validatePincodeDelivery(pincode: string) {
+  // Default pickup zip or from ENV
+  const pickupPincode = process.env.STORE_PICKUP_PINCODE || '110030';
+  const result = await checkPincodeServiceability(pickupPincode, pincode, 5.0);
+  return result;
 }

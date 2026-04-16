@@ -84,9 +84,21 @@ export default async function OrderDetailPage(props: { params: Promise<{ id: str
           <p className="font-body text-[13px] text-secondary leading-relaxed">{order.shippingAddress}</p>
           {order.trackingNumber && (
             <div className="mt-4 pt-4 border-t border-border">
-              <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted mb-1">Tracking</p>
+              <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted mb-1">Tracking ID (Shipment)</p>
               <p className="font-mono text-[13px] text-accent">{order.trackingNumber}</p>
-              {order.awbNumber && <p className="font-mono text-[11px] text-secondary mt-1">AWB: {order.awbNumber}</p>}
+              {order.awbNumber && (
+                <div className="mt-3">
+                  <p className="font-mono text-[11px] text-secondary mb-2">AWB: {order.awbNumber}</p>
+                  <a 
+                    href={`https://shiprocket.co/tracking/${order.awbNumber}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-block px-3 py-1.5 border border-accent text-accent hover:bg-accent/10 transition-colors font-mono text-[10px] uppercase tracking-widest"
+                  >
+                    Track on Shiprocket ↗
+                  </a>
+                </div>
+              )}
             </div>
           )}
         </div>
