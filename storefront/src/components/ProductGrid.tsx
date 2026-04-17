@@ -58,16 +58,32 @@ export default function ProductGrid({ initialFilter = 'All', initialProducts }: 
 
             <div className="product-img">
               <div className="product-img-bg" />
-              <svg className="prod-chandelier-svg" width="160" height="200" viewBox="0 0 100 120" stroke="#C4A05A" fill="none">
-                <path d="M50 10 L50 40" strokeWidth="1" strokeDasharray="3 3"/>
-                <path d="M20 70 Q50 30 80 70" strokeWidth="2" opacity="0.7"/>
-                <path d="M30 80 Q50 50 70 80" strokeWidth="1.5" opacity="0.9"/>
-                <circle cx="20" cy="75" r="3" fill="#E2C882" stroke="none"/>
-                <circle cx="30" cy="85" r="3" fill="#E2C882" stroke="none"/>
-                <circle cx="50" cy="95" r="4" fill="#F5E9C8" stroke="none"/>
-                <circle cx="70" cy="85" r="3" fill="#E2C882" stroke="none"/>
-                <circle cx="80" cy="75" r="3" fill="#E2C882" stroke="none"/>
-              </svg>
+              {product.images && product.images.length > 0 ? (
+                <img 
+                  src={product.images[0]} 
+                  alt={product.name}
+                  className="prod-actual-img"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    position: 'relative',
+                    zIndex: 1,
+                    transition: 'transform 0.5s ease'
+                  }}
+                />
+              ) : (
+                <svg className="prod-chandelier-svg" width="160" height="200" viewBox="0 0 100 120" stroke="#C4A05A" fill="none">
+                  <path d="M50 10 L50 40" strokeWidth="1" strokeDasharray="3 3"/>
+                  <path d="M20 70 Q50 30 80 70" strokeWidth="2" opacity="0.7"/>
+                  <path d="M30 80 Q50 50 70 80" strokeWidth="1.5" opacity="0.9"/>
+                  <circle cx="20" cy="75" r="3" fill="#E2C882" stroke="none"/>
+                  <circle cx="30" cy="85" r="3" fill="#E2C882" stroke="none"/>
+                  <circle cx="50" cy="95" r="4" fill="#F5E9C8" stroke="none"/>
+                  <circle cx="70" cy="85" r="3" fill="#E2C882" stroke="none"/>
+                  <circle cx="80" cy="75" r="3" fill="#E2C882" stroke="none"/>
+                </svg>
+              )}
             </div>
 
             <div className="product-info" style={{ padding: '20px 20px 24px' }}>
