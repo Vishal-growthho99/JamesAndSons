@@ -57,6 +57,7 @@ export default function CloudinaryUpload({
         {(multiple || images.length === 0) && (
           <CldUploadWidget 
             signatureEndpoint="/api/sign-cloudinary"
+            apiKey={process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY}
             onSuccess={handleUpload}
           >
             {({ open }) => (
