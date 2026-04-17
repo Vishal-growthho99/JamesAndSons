@@ -56,9 +56,19 @@ export default function ProductGrid({ initialFilter = 'All', initialProducts }: 
               <Link href={`/rfq?product=${product.slug}`} className="prod-action-btn" title="Request Quote" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }} onClick={(e) => e.stopPropagation()}>Q</Link>
             </div>
 
-            <div className="product-img">
+            <div className="product-img" style={{ position: 'relative' }}>
               <div className="product-img-bg" />
-              {product.images && product.images.length > 0 ? (
+              
+              {/* Placeholder SVG (always in background if there's an image, or as main if not) */}
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 0 }}>
+                <svg className="prod-chandelier-svg" width="120" height="150" viewBox="0 0 100 120" stroke="#C4A05A" fill="none" style={{ opacity: 0.3 }}>
+                  <path d="M50 10 L50 40" strokeWidth="1" strokeDasharray="3 3"/>
+                  <path d="M20 70 Q50 30 80 70" strokeWidth="2" opacity="0.7"/>
+                  <circle cx="50" cy="95" r="4" fill="#F5E9C8" stroke="none"/>
+                </svg>
+              </div>
+
+              {product.images && product.images.length > 0 && (
                 <img 
                   src={product.images[0]} 
                   alt={product.name}
@@ -67,22 +77,19 @@ export default function ProductGrid({ initialFilter = 'All', initialProducts }: 
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',
-                    position: 'relative',
+                    position: 'absolute',
+                    inset: 0,
                     zIndex: 1,
-                    transition: 'transform 0.5s ease'
+                    transition: 'opacity 0.5s ease',
+                    opacity: 0
                   }}
+                  onLoad={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (target) target.style.opacity = '1';
+                  }}
+                  // Start at opacity 0 to show the placeholder
+                  // Note: In some browsers/states this might flicker, but it's the standard way
                 />
-              ) : (
-                <svg className="prod-chandelier-svg" width="160" height="200" viewBox="0 0 100 120" stroke="#C4A05A" fill="none">
-                  <path d="M50 10 L50 40" strokeWidth="1" strokeDasharray="3 3"/>
-                  <path d="M20 70 Q50 30 80 70" strokeWidth="2" opacity="0.7"/>
-                  <path d="M30 80 Q50 50 70 80" strokeWidth="1.5" opacity="0.9"/>
-                  <circle cx="20" cy="75" r="3" fill="#E2C882" stroke="none"/>
-                  <circle cx="30" cy="85" r="3" fill="#E2C882" stroke="none"/>
-                  <circle cx="50" cy="95" r="4" fill="#F5E9C8" stroke="none"/>
-                  <circle cx="70" cy="85" r="3" fill="#E2C882" stroke="none"/>
-                  <circle cx="80" cy="75" r="3" fill="#E2C882" stroke="none"/>
-                </svg>
               )}
             </div>
 
