@@ -25,31 +25,36 @@ export async function loginAction(formData: FormData) {
   }
 
   // 2. Fetch User from Prisma to check Role
-  let dbUser = await prisma.user.findUnique({
-    where: { id: authData.user.id }
-  })
-
-  // 3. Fallback: Sync ID if user exists by email but ID is different (common after DB reset)
-  if (!dbUser && authData.user.email) {
-    const userByEmail = await prisma.user.findUnique({
-      where: { email: authData.user.email }
+  try {
+    let dbUser = await prisma.user.findUnique({
+      where: { id: authData.user.id }
     })
 
-    if (userByEmail && userByEmail.role === 'ADMIN') {
-      // Sync the ID
-      dbUser = await prisma.user.update({
-        where: { email: authData.user.email },
-        data: { id: authData.user.id }
+    // 3. Fallback: Sync ID if user exists by email but ID is different (common after DB reset)
+    if (!dbUser && authData.user.email) {
+      const userByEmail = await prisma.user.findUnique({
+        where: { email: authData.user.email }
       })
-      console.log('DEBUG: Synced Prisma ID with Supabase ID for:', authData.user.email)
-    }
-  }
 
-  // 4. RBAC Check
-  if (!dbUser || dbUser.role !== 'ADMIN') {
-    // If they aren't an admin, immediately log them out
-    await supabase.auth.signOut()
-    return { error: 'Access Denied: You do not have administrator privileges.' }
+      if (userByEmail && userByEmail.role === 'ADMIN') {
+        // Sync the ID
+        dbUser = await prisma.user.update({
+          where: { email: authData.user.email },
+          data: { id: authData.user.id }
+        })
+        console.log('DEBUG: Synced Prisma ID with Supabase ID for:', authData.user.email)
+      }
+    }
+
+    // 4. RBAC Check
+    if (!dbUser || dbUser.role !== 'ADMIN') {
+      // If they aren't an admin, immediately log them out
+      await supabase.auth.signOut()
+      return { error: 'Access Denied: You do not have administrator privileges.' }
+    }
+  } catch (error: any) {
+    console.error('Login database error:', error)
+    return { error: 'Database connection failed. Please check if your database is active.' }
   }
 
   // Success!

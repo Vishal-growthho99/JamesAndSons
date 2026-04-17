@@ -34,15 +34,21 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
 
-  const isAuthPage = request.nextUrl.pathname.startsWith('/login') || 
-                     request.nextUrl.pathname.startsWith('/auth') ||
-                     request.nextUrl.pathname.startsWith('/forgot-password') ||
-                     request.nextUrl.pathname.startsWith('/update-password')
+    const isAuthPage = request.nextUrl.pathname.startsWith('/login') || 
+                      request.nextUrl.pathname.startsWith('/auth') ||
+                      request.nextUrl.pathname.startsWith('/forgot-password') ||
+                      request.nextUrl.pathname.startsWith('/update-password')
 
-  if (!user && !isAuthPage) {
-    return NextResponse.redirect(new URL('/login', request.url))
+    if (!user && !isAuthPage) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+  } catch (error) {
+    console.error('Middleware session update error:', error)
+    // If auth check fails, we don't want to crash the whole app.
+    // We can allow the request through or redirect to a safe page.
   }
 
   return response
