@@ -1,23 +1,19 @@
 const { PrismaClient } = require('@prisma/client');
-require('dotenv').config();
+const { PrismaPg } = require('@prisma/adapter-pg');
+const { Pool } = require('pg');
 
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: "postgresql://postgres.juxvocfnvzzadfxeihxl:-R7d6-%25rgu%24NyG%2B@aws-1-ap-south-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
-    }
-  }
-});
+const url = process.env.DATABASE_URL;
+const pool = new Pool({ connectionString: url, ssl: { rejectUnauthorized: false } });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  try {
-    const products = await prisma.product.count();
-    console.log(`Connection successful. Products: ${products}`);
-  } catch (e) {
-    console.error('Error:', e);
-  } finally {
-    await prisma.$disconnect();
-  }
+  const categories = await prisma.category.findMany();
+  console.log('Categories:', JSON.stringify(categories, null, 2));
+  const productsCount = await prisma.product.count();
+  console.log('Product Count:', productsCount);
+  await prisma.$disconnect();
+  await pool.end();
 }
 
-main();
+main().catch(console.error);

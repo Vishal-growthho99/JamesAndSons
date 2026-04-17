@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import CloudinaryUpload from '@/components/CloudinaryUpload';
 
 type Category = { id: string; name: string };
 
@@ -17,10 +18,7 @@ export default function ProductFormClient({ categories, defaultValues, mode }: {
   const [error, setError] = useState('');
 
   // Images
-  const [images, setImages] = useState<string[]>(defaultValues?.images || ['']);
-  const addImage = () => setImages(prev => [...prev, '']);
-  const updateImage = (i: number, val: string) => setImages(prev => prev.map((img, idx) => idx === i ? val : img));
-  const removeImage = (i: number) => setImages(prev => prev.filter((_, idx) => idx !== i));
+  const [images, setImages] = useState<string[]>(defaultValues?.images || []);
 
   // Variants
   const [variants, setVariants] = useState<Variant[]>(
@@ -168,20 +166,12 @@ export default function ProductFormClient({ categories, defaultValues, mode }: {
       {/* === IMAGES === */}
       <div className="pt-6 border-t border-border">
         <h3 className={sectionTitle}>Product Images</h3>
-        <div className="space-y-2">
-          {images.map((img, i) => (
-            <div key={i} className="flex gap-3 items-center">
-              <span className="font-mono text-[10px] text-muted w-16 flex-shrink-0">Image {i + 1}</span>
-              <input value={img} onChange={e => updateImage(i, e.target.value)} placeholder="https://..." className={`${inputCls} flex-1`} />
-              {images.length > 1 && (
-                <button type="button" onClick={() => removeImage(i)} className="text-red-400/60 hover:text-red-400 font-mono text-[16px] px-2 flex-shrink-0">×</button>
-              )}
-            </div>
-          ))}
-          <button type="button" onClick={addImage} className="font-mono text-[9px] uppercase tracking-[0.15em] text-accent border border-accent/30 px-4 py-2 hover:border-accent transition-colors mt-2">
-            + Add Another Image
-          </button>
-        </div>
+        <CloudinaryUpload 
+          onUpload={(urls) => setImages(urls)}
+          defaultImages={images}
+          multiple={true}
+          label="Add Product Image"
+        />
       </div>
 
       {/* === VARIANTS === */}
@@ -213,7 +203,15 @@ export default function ProductFormClient({ categories, defaultValues, mode }: {
                   <div><label className={labelCls}>Stock Qty</label><input type="number" value={v.stockQuantity} onChange={e => updateVariant(i, 'stockQuantity', e.target.value)} className={inputCls} /></div>
                   <div><label className={labelCls}>D2C Price Override (₹)</label><input type="number" step="0.01" value={v.d2cPrice} onChange={e => updateVariant(i, 'd2cPrice', e.target.value)} placeholder="Leave blank to inherit" className={inputCls} /></div>
                   <div><label className={labelCls}>MRP Override (₹)</label><input type="number" step="0.01" value={v.mrp} onChange={e => updateVariant(i, 'mrp', e.target.value)} placeholder="Leave blank to inherit" className={inputCls} /></div>
-                  <div><label className={labelCls}>Image URLs (comma separated)</label><input value={v.images} onChange={e => updateVariant(i, 'images', e.target.value)} placeholder="https://img1.jpg, https://img2.jpg" className={inputCls} /></div>
+                  <div className="col-span-3">
+                    <label className={labelCls}>Variant Images</label>
+                    <CloudinaryUpload 
+                      onUpload={(urls) => updateVariant(i, 'images', urls.join(', '))}
+                      defaultImages={v.images ? v.images.split(',').map(s => s.trim()).filter(Boolean) : []}
+                      multiple={true}
+                      label="Add Variant Image"
+                    />
+                  </div>
                 </div>
               </div>
             ))}
