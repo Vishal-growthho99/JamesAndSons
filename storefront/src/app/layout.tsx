@@ -42,6 +42,7 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <body
         className={`${cormorant.variable} ${dmMono.variable} ${libreBaskerville.variable} antialiased`}
+        suppressHydrationWarning
       >
         <Providers>
           <div className="flex flex-col min-h-screen">
