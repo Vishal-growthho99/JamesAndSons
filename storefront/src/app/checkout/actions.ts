@@ -131,7 +131,6 @@ export async function verifyPayment(
     console.error('Payment verification failed:', error);
     return { success: false, error: error.message };
   }
-  }
 }
 
 import { checkPincodeServiceability } from '@/lib/shiprocket';
