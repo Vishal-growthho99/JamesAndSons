@@ -9,10 +9,10 @@ type Category = {
   slug: string; 
   description: string | null; 
   _count: { products: number };
-  products: { id: string; name: string }[];
+  products: { id: string; name: string; images: string[] }[];
 };
 
-export default function CategoryManager({ categories, allProducts }: { categories: Category[], allProducts: { id: string, name: string, sku: string }[] }) {
+export default function CategoryManager({ categories, allProducts }: { categories: Category[], allProducts: { id: string, name: string, sku: string, images: string[] }[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showForm, setShowForm] = useState(false);
@@ -151,7 +151,18 @@ export default function CategoryManager({ categories, allProducts }: { categorie
                 <tbody className="divide-y divide-border/50">
                   {categories.find(c => c.id === managingProducts.id)?.products.map(p => (
                     <tr key={p.id} className="hover:bg-background/30">
-                      <td className="px-4 py-3 font-body text-[13px] text-primary">{p.name}</td>
+                      <td className="px-4 py-3 font-body text-[13px] text-primary">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-background border border-border flex items-center justify-center font-mono text-[7px] text-muted overflow-hidden">
+                            {p.images && p.images.length > 0 ? (
+                              <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />
+                            ) : (
+                              'IMG'
+                            )}
+                          </div>
+                          {p.name}
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-right">
                         <button 
                           onClick={() => handleRemoveProduct(p.id)}

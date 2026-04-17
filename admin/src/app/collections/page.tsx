@@ -9,13 +9,13 @@ export default async function CollectionsPage() {
     orderBy: { name: 'asc' },
     include: { 
       _count: { select: { products: true } },
-      products: { select: { id: true, name: true } }
+      products: { select: { id: true, name: true, images: true } }
     }
   });
 
   const allProducts = await prisma.product.findMany({
     orderBy: { name: 'asc' },
-    select: { id: true, name: true, sku: true }
+    select: { id: true, name: true, sku: true, images: true }
   });
 
   return (
