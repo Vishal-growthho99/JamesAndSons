@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function AddProductPage() {
   const categories = await prisma.category.findMany({ orderBy: { name: 'asc' } });
+  const spaces = await prisma.space.findMany({ orderBy: { name: 'asc' } });
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
@@ -16,7 +17,7 @@ export default async function AddProductPage() {
         </Link>
       </div>
       <div className="bg-surface border border-border p-8">
-        <ProductFormClient categories={categories} mode="add" />
+        <ProductFormClient categories={categories} spaces={spaces} mode="add" />
       </div>
     </div>
   );

@@ -23,6 +23,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
     { name: 'RFQ Inbox', href: '/rfqs' },
     { name: 'Catalog & Pricing', href: '/products' },
     { name: 'Collections', href: '/collections' },
+    { name: 'Spaces', href: '/spaces' },
     { name: 'B2B Workspace', href: '/b2b' },
     { name: 'Pages / CMS', href: '/pages' },
     { name: 'Blog', href: '/blog' },

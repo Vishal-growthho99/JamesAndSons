@@ -5,7 +5,8 @@ export async function getProducts(filter?: string): Promise<Product[]> {
   try {
     const dbProducts = await prisma.product.findMany({
       include: {
-        category: true
+        category: true,
+        spaces: true
       }
     });
 
@@ -13,9 +14,9 @@ export async function getProducts(filter?: string): Promise<Product[]> {
       ...p,
       collection: p.category?.name || 'Uncategorized',
       longDescription: p.description,
-      finishes: ['Gold', 'Silver'], // Mock data for finishes
-      spaces: ['Living Room', 'Dining'], // Mock data for spaces
-      specs: [], // Empty specs for now
+      finishes: ['Gold', 'Silver'], // Mock data for finishes (can be moved to DB later)
+      spaces: p.spaces.map(s => s.name),
+      specs: (p.specs as any) || [],
       images: p.images,
     })) as Product[];
 
@@ -39,7 +40,7 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
   try {
     const p = await prisma.product.findUnique({
       where: { slug },
-      include: { category: true }
+      include: { category: true, spaces: true }
     });
     
     if (!p) return undefined;
@@ -49,8 +50,8 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
       collection: p.category?.name || 'Uncategorized',
       longDescription: p.description,
       finishes: ['Gold', 'Silver'],
-      spaces: ['Living Room', 'Dining'],
-      specs: [],
+      spaces: p.spaces.map(s => s.name),
+      specs: (p.specs as any) || [],
       images: p.images,
     } as Product;
   } catch (error) {
@@ -59,3 +60,19 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
   }
 }
 
+export async function getSpaces() {
+  try {
+    const spaces = await prisma.space.findMany({
+      include: {
+        _count: {
+          select: { products: true }
+        }
+      },
+      orderBy: { name: 'asc' }
+    });
+    return spaces;
+  } catch (error) {
+    console.error('Error fetching spaces:', error);
+    return [];
+  }
+}

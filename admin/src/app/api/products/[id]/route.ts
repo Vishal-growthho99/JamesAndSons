@@ -5,7 +5,7 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
   const params = await props.params;
   try {
     const body = await req.json();
-    const { id, variants, specs, images, ...productData } = body;
+    const { id, variants, specs, images, spaceIds, ...productData } = body;
 
     // Delete old variants and recreate
     await prisma.productVariant.deleteMany({ where: { productId: params.id } });
@@ -16,6 +16,9 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
         ...productData,
         images: images || [],
         specs: specs && Object.keys(specs).length > 0 ? specs : undefined,
+        spaces: {
+          set: spaceIds?.map((id: string) => ({ id })) || []
+        },
         updatedAt: new Date(),
         variants: variants?.length > 0
           ? {

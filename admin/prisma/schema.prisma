@@ -130,6 +130,7 @@ model Product {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
+  spaces           Space[]
   variants         ProductVariant[]
   orderItems       OrderItem[]
   rfqItems         RFQItem[]
@@ -288,4 +289,17 @@ model BlogPost {
   metaTitle   String?
   metaDesc    String?
   isDraft     Boolean  @default(true)
+}
+
+model Space {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  image       String?
+
+  products    Product[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

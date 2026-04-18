@@ -8,8 +8,9 @@ type Category = { id: string; name: string };
 type Variant = { name: string; sku: string; d2cPrice: string; mrp: string; stockQuantity: string; images: string };
 type Spec = { key: string; value: string };
 
-export default function ProductFormClient({ categories, defaultValues, mode }: {
+export default function ProductFormClient({ categories, spaces, defaultValues, mode }: {
   categories: Category[];
+  spaces: { id: string; name: string }[];
   defaultValues?: any;
   mode: 'add' | 'edit';
 }) {
@@ -19,6 +20,11 @@ export default function ProductFormClient({ categories, defaultValues, mode }: {
 
   // Images
   const [images, setImages] = useState<string[]>(defaultValues?.images || []);
+
+  // Spaces
+  const [selectedSpaces, setSelectedSpaces] = useState<string[]>(
+    defaultValues?.spaces?.map((s: any) => s.id) || []
+  );
 
   // Variants
   const [variants, setVariants] = useState<Variant[]>(
@@ -59,6 +65,7 @@ export default function ProductFormClient({ categories, defaultValues, mode }: {
       b2bPrice: parseFloat(fd.get('b2bPrice') as string),
       stockQuantity: parseInt(fd.get('stockQuantity') as string, 10) || 0,
       categoryId: fd.get('categoryId'),
+      spaceIds: selectedSpaces,
       isLed: fd.get('isLed') === 'on',
       gstRate: parseFloat(fd.get('gstRate') as string) || 18,
       hsnCode: fd.get('hsnCode'),
@@ -111,6 +118,26 @@ export default function ProductFormClient({ categories, defaultValues, mode }: {
               <option value="">Select Category</option>
               {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
+          </div>
+          <div>
+            <label className={labelCls}>Suited Spaces (Optional)</label>
+            <div className="flex flex-wrap gap-2 p-2 border border-border bg-background min-h-[46px]">
+              {spaces.map(s => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setSelectedSpaces(prev => prev.includes(s.id) ? prev.filter(id => id !== s.id) : [...prev, s.id])}
+                  className={`px-3 py-1 font-mono text-[9px] uppercase tracking-widest border transition-all ${
+                    selectedSpaces.includes(s.id) 
+                      ? 'bg-accent border-accent text-black' 
+                      : 'border-border text-muted hover:border-accent/50'
+                  }`}
+                >
+                  {s.name}
+                </button>
+              ))}
+              {spaces.length === 0 && <p className="text-[10px] text-muted italic p-1">No spaces created yet. Go to the "Spaces" tab to add them.</p>}
+            </div>
           </div>
         </div>
       </div>

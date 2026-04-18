@@ -10,9 +10,9 @@ interface CloudinaryUploadProps {
   label?: string;
 }
 
-export default function CloudinaryUpload({ 
-  onUpload, 
-  defaultImages = [], 
+export default function CloudinaryUpload({
+  onUpload,
+  defaultImages = [],
   multiple = false,
   label = "Upload Image"
 }: CloudinaryUploadProps) {
@@ -38,10 +38,10 @@ export default function CloudinaryUpload({
       <div className="flex flex-wrap gap-4">
         {images.map((url, idx) => (
           <div key={idx} className="relative w-24 h-24 border border-border group">
-            <Image 
-              src={url} 
-              alt="Uploaded product" 
-              fill 
+            <Image
+              src={url}
+              alt="Uploaded product"
+              fill
               className="object-cover"
             />
             <button
@@ -53,9 +53,9 @@ export default function CloudinaryUpload({
             </button>
           </div>
         ))}
-        
+
         {(multiple || images.length === 0) && (
-          <CldUploadWidget 
+          <CldUploadWidget
             signatureEndpoint="/api/sign-cloudinary"
             uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
             options={{
@@ -76,7 +76,7 @@ export default function CloudinaryUpload({
           </CldUploadWidget>
         )}
       </div>
-      
+
       {images.length === 0 && !multiple && (
         <p className="text-[11px] text-muted italic">No image uploaded yet.</p>
       )}

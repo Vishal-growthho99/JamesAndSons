@@ -8,7 +8,7 @@ function generateSlug(name: string) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { variants, specs, images, ...productData } = body;
+    const { variants, specs, images, spaceIds, ...productData } = body;
 
     let slug = generateSlug(productData.name);
     // Ensure slug uniqueness
@@ -22,6 +22,9 @@ export async function POST(req: NextRequest) {
         description: productData.description || '',
         images: images || [],
         specs: specs && Object.keys(specs).length > 0 ? specs : undefined,
+        spaces: spaceIds?.length > 0 
+          ? { connect: spaceIds.map((id: string) => ({ id })) }
+          : undefined,
         variants: variants?.length > 0
           ? {
               create: variants.map((v: any) => ({
