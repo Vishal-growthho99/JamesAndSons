@@ -8,34 +8,40 @@ export default function ProductGrid({ initialFilter = 'All', initialProducts }: 
   const [activeFilter, setActiveFilter] = useState(initialFilter || 'All');
   const { addItem } = useCartStore();
 
-  const filters = ['All', 'Modern', 'Classical', 'LED Certified', 'Grand Foyer', 'Dining Estate'];
+  const uniqueCollections = Array.from(new Set(initialProducts.map(p => p.collection))).filter(c => c !== 'Uncategorized').sort();
+  const uniqueStyles = Array.from(new Set(initialProducts.flatMap(p => p.style || []))).filter(Boolean).sort();
+  const uniqueMaterials = Array.from(new Set(initialProducts.flatMap(p => p.materialAndFinish || []))).filter(Boolean).sort();
+  const uniqueSpaces = Array.from(new Set(initialProducts.flatMap(p => p.spaces || []))).filter(Boolean).sort();
   
-  const f = activeFilter.toLowerCase();
+  const filters = ['All', ...uniqueCollections, ...uniqueSpaces, ...uniqueStyles, ...uniqueMaterials, 'LED Certified'];
+  
   const products = activeFilter === 'All' ? initialProducts : initialProducts.filter(p =>
-    p.collection.toLowerCase().includes(f) ||
-    p.spaces.some(s => s.toLowerCase().includes(f)) ||
-    (f === 'led certified' && p.isLed) ||
-    (f === 'modern' && p.collection.toLowerCase().includes('modern')) ||
-    (f === 'classical' && p.collection.toLowerCase().includes('heritage'))
+    (p.collection === activeFilter) ||
+    (p.spaces && p.spaces.includes(activeFilter)) ||
+    (p.style && p.style.includes(activeFilter)) ||
+    (p.materialAndFinish && p.materialAndFinish.includes(activeFilter)) ||
+    (activeFilter === 'LED Certified' && p.isLed)
   );
 
   return (
     <section className="section" id="collections">
       <div className="section-header">
         <div>
-          <div className="section-label">Masterworks</div>
-          <h2 className="section-title">The <em>Heritage</em> Collection</h2>
+          <div className="section-label">{activeFilter === 'All' ? 'Masterworks' : 'Curated Selection'}</div>
+          <h2 className="section-title">
+            {activeFilter === 'All' ? 'All Collections' : `The ${activeFilter} Collection`}
+          </h2>
         </div>
         <Link href="/collections" className="link-all">View All {products.length} Products</Link>
       </div>
 
-      <div className="filter-bar">
+      <div className="filter-bar" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
         <span className="filter-label">Filter:</span>
         {filters.map(filter => (
           <button
             key={filter}
             onClick={() => setActiveFilter(filter)}
-            className={`filter-btn ${activeFilter.toLowerCase() === filter.toLowerCase() ? 'active' : ''}`}
+            className={`filter-btn ${activeFilter === filter ? 'active' : ''}`}
           >
             {filter}
           </button>

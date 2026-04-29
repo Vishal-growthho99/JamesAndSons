@@ -70,6 +70,10 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
       gstRate: parseFloat(fd.get('gstRate') as string) || 18,
       hsnCode: fd.get('hsnCode'),
       bisCertification: fd.get('bisCertification'),
+      dimensions: fd.get('dimensions'),
+      materialAndFinish: fd.get('materialAndFinish') ? (fd.get('materialAndFinish') as string).split(',').map(s => s.trim()).filter(Boolean) : [],
+      bulbType: fd.get('bulbType') ? (fd.get('bulbType') as string).split(',').map(s => s.trim()).filter(Boolean) : [],
+      style: fd.get('style') ? (fd.get('style') as string).split(',').map(s => s.trim()).filter(Boolean) : [],
       images: images.filter(img => img.trim()),
       variants: variants.map(v => ({
         name: v.name,
@@ -170,6 +174,13 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
             <input type="checkbox" name="isLed" id="isLed" defaultChecked={defaultValues?.isLed} className="w-4 h-4 accent-[#c4a05a]" />
             <label htmlFor="isLed" className="font-mono text-[11px] uppercase tracking-widest text-muted cursor-pointer">LED Product</label>
           </div>
+        </div>
+
+        <div className="grid grid-cols-4 gap-6 mb-6">
+          <div><label className={labelCls}>Dimensions</label><input name="dimensions" defaultValue={defaultValues?.dimensions} className={inputCls} placeholder='e.g. 39" (H) x 40" (W)' /></div>
+          <div><label className={labelCls}>Material & Finish</label><input name="materialAndFinish" defaultValue={defaultValues?.materialAndFinish?.join(', ')} className={inputCls} placeholder="e.g. Metal, Black finish (comma separated)" /></div>
+          <div><label className={labelCls}>Bulb Type</label><input name="bulbType" defaultValue={defaultValues?.bulbType?.join(', ')} className={inputCls} placeholder="e.g. E12, LED (comma separated)" /></div>
+          <div><label className={labelCls}>Style</label><input name="style" defaultValue={defaultValues?.style?.join(', ')} className={inputCls} placeholder="e.g. Traditional, Rustic (comma separated)" /></div>
         </div>
 
         <div className="space-y-2">

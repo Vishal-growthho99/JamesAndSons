@@ -114,6 +114,13 @@ model Product {
   hsnCode          String?
   gstRate          Float    @default(18.0) // 5% for LED, 18% for traditional
   bisCertification String?  // IS 10322 etc.
+  
+  // New fields from CSV
+  dimensions        String?  // Dimensions
+  materialAndFinish String[] // Material & Finish
+  bulbType          String[] // Bulb Type
+  style             String[] // Style
+  
   specs            Json?    // Dynamic key-value technical specs for filtering
   
   // Media
@@ -169,6 +176,10 @@ model Order {
   trackingNumber String?
   awbNumber      String?     // For logistics (Shiprocket/Delhivery)
   irn            String?     // E-Invoicing Reference Number
+  
+  razorpayOrderId   String?  @unique
+  razorpayPaymentId String?
+  razorpaySignature String?
   
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt

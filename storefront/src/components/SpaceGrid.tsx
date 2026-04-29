@@ -28,7 +28,7 @@ export default function SpaceGrid({ spaces }: { spaces: Space[] }) {
       
       <div className="space-grid">
         {/* Main large space */}
-        <Link href={`/collections?space=${mainSpace.slug}`} className="space-card block">
+        <Link href={`/collections?space=${encodeURIComponent(mainSpace.name)}`} className="space-card block">
           {mainSpace.image ? (
             <div className="space-card-bg" style={{ backgroundImage: `url(${mainSpace.image})`, backgroundSize: 'cover', opacity: 1 }}></div>
           ) : (
@@ -58,7 +58,7 @@ export default function SpaceGrid({ spaces }: { spaces: Space[] }) {
         
         <div className="space-grid-right">
           {otherSpaces.map((space) => (
-            <Link key={space.id} href={`/collections?space=${space.slug}`} className="space-card block">
+            <Link key={space.id} href={`/collections?space=${encodeURIComponent(space.name)}`} className="space-card block">
               {space.image ? (
                 <div className="space-card-bg" style={{ backgroundImage: `url(${space.image})`, backgroundSize: 'cover', opacity: 1 }}></div>
               ) : (

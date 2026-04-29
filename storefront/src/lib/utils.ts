@@ -17,7 +17,10 @@ export type Product = {
   hsnCode?: string | null;
   stockQuantity: number;
   weight?: number | null;
-  dimensions?: { diameter: number; height: number };
+  dimensions?: string | null;
+  materialAndFinish: string[];
+  bulbType: string[];
+  style: string[];
   finishes: string[];
   spaces: string[];
   badge?: 'new' | 'bis' | 'sale' | 'b2b';

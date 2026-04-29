@@ -216,23 +216,35 @@ export default function PDPClient({ product, variants }: { product: any; variant
         </div>
 
         {/* Dynamic Specs Table */}
-        {product.specs && typeof product.specs === 'object' && Object.keys(product.specs).length > 0 && (
-          <div className="pdp-specs">
-            <div className="section-label">Technical Specifications</div>
-            <div className="pdp-specs-table-wrapper">
-              <table>
-                <tbody>
-                  {Object.entries(product.specs as Record<string, string>).map(([key, value]) => (
-                    <tr key={key}>
-                      <td className="pdp-spec-key">{key}</td>
-                      <td className="pdp-spec-val">{value}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {(() => {
+          const combinedSpecs = {
+            ...(product.dimensions && { 'Dimensions': product.dimensions }),
+            ...(product.materialAndFinish?.length > 0 && { 'Material & Finish': product.materialAndFinish.join(', ') }),
+            ...(product.bulbType?.length > 0 && { 'Bulb Type': product.bulbType.join(', ') }),
+            ...(product.style?.length > 0 && { 'Style': product.style.join(', ') }),
+            ...((product.specs && typeof product.specs === 'object') ? product.specs : {})
+          };
+
+          if (Object.keys(combinedSpecs).length === 0) return null;
+
+          return (
+            <div className="pdp-specs">
+              <div className="section-label">Technical Specifications</div>
+              <div className="pdp-specs-table-wrapper">
+                <table>
+                  <tbody>
+                    {Object.entries(combinedSpecs).map(([key, value]) => (
+                      <tr key={key}>
+                        <td className="pdp-spec-key">{key}</td>
+                        <td className="pdp-spec-val">{value as React.ReactNode}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
       </div>
     </div>
