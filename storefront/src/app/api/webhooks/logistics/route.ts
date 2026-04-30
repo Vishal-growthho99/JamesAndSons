@@ -29,8 +29,10 @@ export async function POST(req: Request) {
 
     const { event, order_id, awb } = payload;
 
-    if (!order_id) {
-      return NextResponse.json({ error: 'Missing order_id' }, { status: 400 });
+    // If it's a test payload from Shiprocket without real data, just return 200
+    if (!order_id || !event) {
+      console.log('Test payload or missing data received. Responding with 200.');
+      return NextResponse.json({ success: true, message: 'Test notification received' });
     }
 
     // Map Shiprocket events to our Prisma OrderStatus enum
