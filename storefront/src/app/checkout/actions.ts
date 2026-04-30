@@ -151,7 +151,7 @@ export async function verifyPayment(
         const shiprocketParams = {
           order_id: fullOrder.orderNumber,
           order_date: fullOrder.createdAt.toISOString().split('T')[0],
-          pickup_location: "Primary",
+          pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || "Primary",
           billing_customer_name: fullOrder.user.firstName,
           billing_last_name: fullOrder.user.lastName,
           billing_address: address,
@@ -174,15 +174,24 @@ export async function verifyPayment(
           weight: 0.5,
         };
 
+        console.log('--- Shiprocket Automation Debug ---');
+        console.log('Payload:', JSON.stringify(shiprocketParams, null, 2));
+
         const shipRes = await createShiprocketOrder(shiprocketParams);
+        
+        console.log('Shiprocket Response:', JSON.stringify(shipRes, null, 2));
+
         if (shipRes.success) {
           await prisma.order.update({
             where: { id: internalOrderId },
             data: {
-              awbNumber: shipRes.shipment_id?.toString(), // Storing shipment_id as AWB for now if real AWB not assigned yet
+              awbNumber: shipRes.shipment_id?.toString(),
               trackingNumber: shipRes.order_id?.toString(),
             }
           });
+          console.log('Order successfully pushed to Shiprocket.');
+        } else {
+          console.error('Shiprocket Order Sync Failed:', shipRes.message);
         }
       }
     } catch (automationError) {
