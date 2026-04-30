@@ -93,8 +93,12 @@ export async function createOrder(
       key: process.env.RAZORPAY_KEY_ID
     };
   } catch (error: any) {
-    console.error('Order creation error:', error);
-    return { success: false, error: error.message };
+    console.error('CRITICAL: Order creation failed:', error);
+    // Return the actual error message to the client for debugging
+    return { 
+      success: false, 
+      error: error.message || 'An internal error occurred during order creation.' 
+    };
   }
 }
 
@@ -196,12 +200,22 @@ export async function verifyPayment(
 import { checkPincodeServiceability, getShippingRates, createShiprocketOrder } from '@/lib/shiprocket';
 
 export async function validatePincodeDelivery(pincode: string) {
-  // Default pickup zip or from ENV
-  const pickupPincode = process.env.STORE_PICKUP_PINCODE || '110030';
-  const result = await checkPincodeServiceability(pickupPincode, pincode, 5.0);
-  return result;
+  try {
+    // Default pickup zip or from ENV
+    const pickupPincode = process.env.STORE_PICKUP_PINCODE || '110030';
+    const result = await checkPincodeServiceability(pickupPincode, pincode, 5.0);
+    return result;
+  } catch (error: any) {
+    console.error('Pincode validation action error:', error);
+    return { status: 500, serviceable: false, message: error.message };
+  }
 }
 
 export async function calculateShippingRateAction(pincode: string, weightKg: number, subtotal: number) {
-  return await getShippingRates(pincode, weightKg, subtotal);
+  try {
+    return await getShippingRates(pincode, weightKg, subtotal);
+  } catch (error: any) {
+    console.error('Shipping rate action error:', error);
+    return null;
+  }
 }
