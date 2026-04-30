@@ -108,3 +108,167 @@ export async function createShiprocketOrder(params: any) {
     return { success: false, message: 'API Call Failed' };
   }
 }
+/**
+ * Synchronize a product (and its variants) with Shiprocket's catalogue
+ */
+export async function syncProductToShiprocket(product: any) {
+  const token = await getShiprocketToken();
+  if (!token) return { success: false, message: 'Logistics service unavailable' };
+
+  const itemsToSync = [];
+
+  // If product has variants, sync each variant as a separate SKU
+  if (product.variants && product.variants.length > 0) {
+    product.variants.forEach((v: any) => {
+      itemsToSync.push({
+        name: `${product.name} - ${v.name}`,
+        sku: v.sku,
+        mrp: v.mrp || product.mrp,
+        selling_price: v.d2cPrice || product.d2cPrice,
+        qty: v.stockQuantity || 0,
+        hsn_code: product.hsnCode || '',
+        weight: v.weight || product.weight || 0.5, 
+        length: v.length || product.length || 10, 
+        breadth: v.breadth || product.breadth || 10, 
+        height: v.height || product.height || 10,
+        category_code: "default",
+        type: "Single",
+        channel_id: 10319482 // Synchronize to the "CUSTOM" channel so it appears in Listings
+      });
+    });
+  } else {
+    // Sync the main product
+    itemsToSync.push({
+      name: product.name,
+      sku: product.sku,
+      mrp: product.mrp,
+      selling_price: product.d2cPrice,
+      qty: product.stockQuantity || 0,
+      hsn_code: product.hsnCode || '',
+      weight: product.weight || 0.5,
+      length: product.length || 10, 
+      breadth: product.breadth || 10, 
+      height: product.height || 10,
+      category_code: "default",
+      type: "Single",
+      channel_id: 10319482
+    });
+  }
+
+  const results = [];
+  for (const item of itemsToSync) {
+    try {
+      const res = await fetch('https://apiv2.shiprocket.in/v1/external/products', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}` 
+        },
+        body: JSON.stringify(item),
+        cache: 'no-store'
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        console.error(`Shiprocket Sync Failed for SKU ${item.sku}:`, data);
+      }
+      results.push({ sku: item.sku, success: res.ok, data });
+    } catch (err) {
+      console.error(`Error syncing SKU ${item.sku}:`, err);
+      results.push({ sku: item.sku, success: false, error: err });
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Get real-time shipping rates based on pincode and weight
+ */
+export async function getShippingRates(deliveryPincode: string, weightKg: number, subtotal: number) {
+  const token = await getShiprocketToken();
+  if (!token) return null;
+
+  try {
+    const res = await fetch(
+      `https://apiv2.shiprocket.in/v1/external/courier/serviceability/?pickup_postcode=110001&delivery_postcode=${deliveryPincode}&weight=${weightKg}&cod=0`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store'
+      }
+    );
+
+    const data = await res.json();
+    if (data.status === 200 && data.data?.available_courier_companies) {
+      const couriers = data.data.available_courier_companies;
+      // Get the cheapest or recommended rate
+      const rate = couriers[0].rate;
+      
+      // Apply custom logic: free shipping over 50k, or add 15% handling margin
+      let finalRate = rate * 1.15; // 15% markup
+      if (subtotal > 50000) finalRate = 0;
+
+      return {
+        rate: Math.ceil(finalRate),
+        etd: couriers[0].etd,
+        courierName: couriers[0].courier_name
+      };
+    }
+    return null;
+  } catch (err) {
+    console.error('getShippingRates Error:', err);
+    return null;
+  }
+}
+
+/**
+ * Generate Shipping Label PDF
+ */
+export async function generateLabel(shipmentIds: number[]) {
+  const token = await getShiprocketToken();
+  if (!token) return null;
+
+  try {
+    const res = await fetch('https://apiv2.shiprocket.in/v1/external/courier/generate/label', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}` 
+      },
+      body: JSON.stringify({ shipment_id: shipmentIds }),
+      cache: 'no-store'
+    });
+
+    const data = await res.json();
+    return data.label_url || null;
+  } catch (err) {
+    console.error('generateLabel Error:', err);
+    return null;
+  }
+}
+
+/**
+ * Request Pickup for shipments
+ */
+export async function requestPickup(shipmentIds: number[]) {
+  const token = await getShiprocketToken();
+  if (!token) return null;
+
+  try {
+    const res = await fetch('https://apiv2.shiprocket.in/v1/external/courier/generate/pickup', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}` 
+      },
+      body: JSON.stringify({ shipment_id: shipmentIds }),
+      cache: 'no-store'
+    });
+
+    return await res.json();
+  } catch (err) {
+    console.error('requestPickup Error:', err);
+    return null;
+  }
+}
+

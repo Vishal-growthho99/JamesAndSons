@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
+import { syncProductToShiprocket } from '@/lib/shiprocket';
 
 function generateSlug(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
@@ -35,12 +36,30 @@ export async function POST(req: NextRequest) {
                 b2bPrice: v.b2bPrice || null,
                 stockQuantity: v.stockQuantity || 0,
                 images: v.images || [],
+                weight: v.weight || null,
+                length: v.length || null,
+                breadth: v.breadth || null,
+                height: v.height || null,
               }))
             }
           : undefined,
       },
     });
 
+    // Sync with Shiprocket
+    try {
+      const fullProduct = await prisma.product.findUnique({
+        where: { id: product.id },
+        include: { variants: true }
+      });
+      if (fullProduct) {
+        await syncProductToShiprocket(fullProduct);
+      }
+    } catch (syncError) {
+      console.error('Shiprocket Sync Error:', syncError);
+      // We don't fail the whole request if sync fails, but we log it
+    }
+    
     return NextResponse.json(product);
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });

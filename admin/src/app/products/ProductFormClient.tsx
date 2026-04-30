@@ -5,7 +5,18 @@ import CloudinaryUpload from '@/components/CloudinaryUpload';
 
 type Category = { id: string; name: string };
 
-type Variant = { name: string; sku: string; d2cPrice: string; mrp: string; stockQuantity: string; images: string };
+type Variant = { 
+  name: string; 
+  sku: string; 
+  d2cPrice: string; 
+  mrp: string; 
+  stockQuantity: string; 
+  images: string;
+  weight: string;
+  length: string;
+  breadth: string;
+  height: string;
+};
 type Spec = { key: string; value: string };
 
 export default function ProductFormClient({ categories, spaces, defaultValues, mode }: {
@@ -35,9 +46,24 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
       mrp: String(v.mrp || ''),
       stockQuantity: String(v.stockQuantity || '0'),
       images: (v.images || []).join(', '),
+      weight: String(v.weight || ''),
+      length: String(v.length || ''),
+      breadth: String(v.breadth || ''),
+      height: String(v.height || ''),
     })) || []
   );
-  const addVariant = () => setVariants(prev => [...prev, { name: '', sku: '', d2cPrice: '', mrp: '', stockQuantity: '0', images: '' }]);
+  const addVariant = () => setVariants(prev => [...prev, { 
+    name: '', 
+    sku: '', 
+    d2cPrice: '', 
+    mrp: '', 
+    stockQuantity: '0', 
+    images: '',
+    weight: '',
+    length: '',
+    breadth: '',
+    height: ''
+  }]);
   const updateVariant = (i: number, field: keyof Variant, val: string) => setVariants(prev => prev.map((v, idx) => idx === i ? { ...v, [field]: val } : v));
   const removeVariant = (i: number) => setVariants(prev => prev.filter((_, idx) => idx !== i));
 
@@ -64,6 +90,10 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
       d2cPrice: parseFloat(fd.get('d2cPrice') as string),
       b2bPrice: parseFloat(fd.get('b2bPrice') as string),
       stockQuantity: parseInt(fd.get('stockQuantity') as string, 10) || 0,
+      weight: parseFloat(fd.get('weight') as string) || 0.5,
+      length: parseFloat(fd.get('length') as string) || 10,
+      breadth: parseFloat(fd.get('breadth') as string) || 10,
+      height: parseFloat(fd.get('height') as string) || 10,
       categoryId: fd.get('categoryId'),
       spaceIds: selectedSpaces,
       isLed: fd.get('isLed') === 'on',
@@ -82,6 +112,10 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
         mrp: v.mrp ? parseFloat(v.mrp) : null,
         stockQuantity: parseInt(v.stockQuantity, 10) || 0,
         images: v.images ? v.images.split(',').map(s => s.trim()).filter(Boolean) : [],
+        weight: v.weight ? parseFloat(v.weight) : null,
+        length: v.length ? parseFloat(v.length) : null,
+        breadth: v.breadth ? parseFloat(v.breadth) : null,
+        height: v.height ? parseFloat(v.height) : null,
       })),
       specs: specs.reduce((acc: any, s) => { if (s.key) acc[s.key] = s.value; return acc; }, {}),
     };
@@ -154,6 +188,12 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
           <div><label className={labelCls}>D2C Price (₹) *</label><input required type="number" step="0.01" name="d2cPrice" defaultValue={defaultValues?.d2cPrice} className={inputCls} /></div>
           <div><label className={labelCls}>B2B Price (₹) *</label><input required type="number" step="0.01" name="b2bPrice" defaultValue={defaultValues?.b2bPrice} className={inputCls} /></div>
           <div><label className={labelCls}>Stock Qty</label><input type="number" name="stockQuantity" defaultValue={defaultValues?.stockQuantity || 0} className={inputCls} /></div>
+        </div>
+        <div className="grid grid-cols-4 gap-6 mt-6">
+          <div><label className={labelCls}>Weight (kg)</label><input type="number" step="0.01" name="weight" defaultValue={defaultValues?.weight || 0.5} className={inputCls} /></div>
+          <div><label className={labelCls}>Length (cm)</label><input type="number" step="0.1" name="length" defaultValue={defaultValues?.length || 10} className={inputCls} /></div>
+          <div><label className={labelCls}>Breadth (cm)</label><input type="number" step="0.1" name="breadth" defaultValue={defaultValues?.breadth || 10} className={inputCls} /></div>
+          <div><label className={labelCls}>Height (cm)</label><input type="number" step="0.1" name="height" defaultValue={defaultValues?.height || 10} className={inputCls} /></div>
         </div>
       </div>
 
@@ -241,6 +281,12 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
                   <div><label className={labelCls}>Stock Qty</label><input type="number" value={v.stockQuantity} onChange={e => updateVariant(i, 'stockQuantity', e.target.value)} className={inputCls} /></div>
                   <div><label className={labelCls}>D2C Price Override (₹)</label><input type="number" step="0.01" value={v.d2cPrice} onChange={e => updateVariant(i, 'd2cPrice', e.target.value)} placeholder="Leave blank to inherit" className={inputCls} /></div>
                   <div><label className={labelCls}>MRP Override (₹)</label><input type="number" step="0.01" value={v.mrp} onChange={e => updateVariant(i, 'mrp', e.target.value)} placeholder="Leave blank to inherit" className={inputCls} /></div>
+                  <div className="grid grid-cols-4 gap-4 col-span-3">
+                    <div><label className={labelCls}>Weight (kg)</label><input type="number" step="0.01" value={v.weight} onChange={e => updateVariant(i, 'weight', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
+                    <div><label className={labelCls}>Length (cm)</label><input type="number" step="0.1" value={v.length} onChange={e => updateVariant(i, 'length', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
+                    <div><label className={labelCls}>Breadth (cm)</label><input type="number" step="0.1" value={v.breadth} onChange={e => updateVariant(i, 'breadth', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
+                    <div><label className={labelCls}>Height (cm)</label><input type="number" step="0.1" value={v.height} onChange={e => updateVariant(i, 'height', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
+                  </div>
                   <div className="col-span-3">
                     <label className={labelCls}>Variant Images</label>
                     <CloudinaryUpload 
@@ -258,13 +304,18 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
       </div>
 
       {/* === SUBMIT === */}
-      <div className="pt-6 border-t border-border flex justify-end gap-4">
-        <button type="button" onClick={() => router.back()} className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted border border-border px-6 py-3 hover:text-primary transition-colors">
-          Cancel
-        </button>
-        <button type="submit" disabled={saving} className="btn-primary disabled:opacity-50">
-          {saving ? 'Saving...' : mode === 'add' ? 'Save Product' : 'Update Product'}
-        </button>
+      <div className="pt-6 border-t border-border flex flex-col items-end gap-4">
+        <div className="flex gap-4">
+          <button type="button" onClick={() => router.back()} className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted border border-border px-6 py-3 hover:text-primary transition-colors">
+            Cancel
+          </button>
+          <button type="submit" disabled={saving} className="btn-primary disabled:opacity-50">
+            {saving ? 'Saving...' : mode === 'add' ? 'Save Product' : 'Update Product'}
+          </button>
+        </div>
+        <p className="font-mono text-[8px] uppercase tracking-widest text-accent/60">
+          * Product catalogue and inventory will be automatically synced with Shiprocket
+        </p>
       </div>
     </form>
   );

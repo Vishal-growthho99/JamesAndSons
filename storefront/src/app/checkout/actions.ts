@@ -126,6 +126,66 @@ export async function verifyPayment(
       },
     });
 
+    // === AUTOMATION: Create Shiprocket Shipment immediately ===
+    try {
+      const fullOrder = await prisma.order.findUnique({
+        where: { id: internalOrderId },
+        include: { 
+          items: { include: { product: true } },
+          user: true
+        }
+      });
+
+      if (fullOrder) {
+        const addressParts = fullOrder.shippingAddress.split(',').map(s => s.trim());
+        // Simple heuristic to split address back for API
+        const pincode = fullOrder.shippingAddress.match(/\d{6}$/)?.[0] || '';
+        const state = addressParts[addressParts.length - 1].replace(pincode, '').replace('-', '').trim();
+        const city = addressParts[addressParts.length - 2];
+        const address = addressParts.slice(0, -2).join(', ');
+
+        const shiprocketParams = {
+          order_id: fullOrder.orderNumber,
+          order_date: fullOrder.createdAt.toISOString().split('T')[0],
+          pickup_location: "Primary",
+          billing_customer_name: fullOrder.user.firstName,
+          billing_last_name: fullOrder.user.lastName,
+          billing_address: address,
+          billing_city: city,
+          billing_pincode: pincode,
+          billing_state: state,
+          billing_country: "India",
+          billing_email: fullOrder.user.email,
+          billing_phone: fullOrder.user.phone || '',
+          shipping_is_billing: true,
+          order_items: fullOrder.items.map(item => ({
+            name: item.product.name,
+            sku: item.product.sku,
+            units: item.quantity,
+            selling_price: item.unitPrice,
+          })),
+          payment_method: "Prepaid",
+          sub_total: fullOrder.totalAmount - fullOrder.taxAmount - fullOrder.shippingAmount,
+          length: 10, breadth: 10, height: 10, // Default for now
+          weight: 0.5,
+        };
+
+        const shipRes = await createShiprocketOrder(shiprocketParams);
+        if (shipRes.success) {
+          await prisma.order.update({
+            where: { id: internalOrderId },
+            data: {
+              awbNumber: shipRes.shipment_id?.toString(), // Storing shipment_id as AWB for now if real AWB not assigned yet
+              trackingNumber: shipRes.order_id?.toString(),
+            }
+          });
+        }
+      }
+    } catch (automationError) {
+      console.error('Shiprocket Automation Error:', automationError);
+      // Don't fail the user payment if automation fails
+    }
+
     return { success: true };
   } catch (error: any) {
     console.error('Payment verification failed:', error);
@@ -133,11 +193,15 @@ export async function verifyPayment(
   }
 }
 
-import { checkPincodeServiceability } from '@/lib/shiprocket';
+import { checkPincodeServiceability, getShippingRates, createShiprocketOrder } from '@/lib/shiprocket';
 
 export async function validatePincodeDelivery(pincode: string) {
   // Default pickup zip or from ENV
   const pickupPincode = process.env.STORE_PICKUP_PINCODE || '110030';
   const result = await checkPincodeServiceability(pickupPincode, pincode, 5.0);
   return result;
+}
+
+export async function calculateShippingRateAction(pincode: string, weightKg: number, subtotal: number) {
+  return await getShippingRates(pincode, weightKg, subtotal);
 }

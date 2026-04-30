@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
+import { syncProductToShiprocket } from '@/lib/shiprocket';
 
 export async function PUT(req: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -30,11 +31,28 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ id: strin
                 b2bPrice: v.b2bPrice || null,
                 stockQuantity: v.stockQuantity || 0,
                 images: v.images || [],
+                weight: v.weight || null,
+                length: v.length || null,
+                breadth: v.breadth || null,
+                height: v.height || null,
               }))
             }
           : undefined,
       },
     });
+
+    // Sync with Shiprocket
+    try {
+      const fullProduct = await prisma.product.findUnique({
+        where: { id: params.id },
+        include: { variants: true }
+      });
+      if (fullProduct) {
+        await syncProductToShiprocket(fullProduct);
+      }
+    } catch (syncError) {
+      console.error('Shiprocket Sync Error:', syncError);
+    }
 
     return NextResponse.json(product);
   } catch (e: any) {

@@ -45,3 +45,25 @@ export async function trackShiprocketShipment(awbNumber: string) {
     return { success: false, error: error.message };
   }
 }
+
+import { generateLabel, requestPickup } from '@/lib/shiprocket';
+
+export async function generateOrderLabel(shipmentId: string) {
+  try {
+    const url = await generateLabel([parseInt(shipmentId)]);
+    return { success: !!url, labelUrl: url };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
+export async function requestOrderPickup(shipmentId: string) {
+  try {
+    const result = await requestPickup([parseInt(shipmentId)]);
+    revalidatePath('/orders/[id]', 'page');
+    return { success: true, result };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+

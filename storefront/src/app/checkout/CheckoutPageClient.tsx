@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useCartStore } from '@/store/cart';
 import { formatPrice } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
-import { createOrder, verifyPayment, validatePincodeDelivery } from './actions';
+import { createOrder, verifyPayment, validatePincodeDelivery, calculateShippingRateAction } from './actions';
 
 export default function CheckoutPageInner() {
   const { items, total, clearCart } = useCartStore();
@@ -20,7 +20,8 @@ export default function CheckoutPageInner() {
 
   const subtotal = total();
   const gst = subtotal * 0.05;
-  const shipping = subtotal > 50000 ? 0 : 2500;
+  const [shipping, setShipping] = useState(subtotal > 50000 ? 0 : 2500);
+  const [etd, setEtd] = useState('');
   const grandTotal = subtotal + gst + shipping;
 
   const update = (key: string, val: string) => setForm(prev => ({ ...prev, [key]: val }));
@@ -193,6 +194,12 @@ export default function CheckoutPageInner() {
                 try {
                   const check = await validatePincodeDelivery(form.pincode);
                   if (check.serviceable) {
+                    // Fetch dynamic shipping rate
+                    const rateData = await calculateShippingRateAction(form.pincode, 5.0, subtotal);
+                    if (rateData) {
+                      setShipping(rateData.rate);
+                      setEtd(rateData.etd);
+                    }
                     setStep(2);
                   } else {
                     setOrderError(`Sorry, we currently do not deliver to pincode ${form.pincode}.`);
@@ -265,6 +272,11 @@ export default function CheckoutPageInner() {
               <span>Total</span>
               <span style={{ color: 'var(--gold-light)' }}>{formatPrice(grandTotal)}</span>
             </div>
+            {etd && (
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--green)', textAlign: 'right', marginTop: '4px' }}>
+                Estimated Delivery: {etd}
+              </div>
+            )}
           </div>
         </div>
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', padding: '16px 20px' }}>

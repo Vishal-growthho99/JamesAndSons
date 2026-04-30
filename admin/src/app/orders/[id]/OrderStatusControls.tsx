@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { updateOrderStatus, updateTrackingNumber } from '../actions';
-import { syncRazorpayPayment, trackShiprocketShipment } from './logistics-actions';
+import { syncRazorpayPayment, trackShiprocketShipment, generateOrderLabel, requestOrderPickup } from './logistics-actions';
 
 const STATUS_OPTIONS = ['PENDING', 'PAID', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
@@ -60,6 +60,27 @@ export default function OrderStatusControls({
     });
   };
 
+  const handleGenerateLabel = () => {
+    if (!awbNumber) return; // Note: awbNumber currently stores the shipment_id from automation
+    startTransition(async () => {
+      const result = await generateOrderLabel(awbNumber);
+      if (result.success && result.labelUrl) {
+        window.open(result.labelUrl, '_blank');
+      } else {
+        alert('Failed to generate label: ' + (result.error || 'Check if AWB is assigned'));
+      }
+    });
+  };
+
+  const handleRequestPickup = () => {
+    if (!awbNumber) return;
+    startTransition(async () => {
+      const result = await requestOrderPickup(awbNumber);
+      if (result.success) alert('Pickup requested successfully!');
+      else alert('Pickup request failed: ' + result.error);
+    });
+  };
+
   return (
     <div className="bg-surface border border-border p-6 space-y-6">
       <div className="flex justify-between items-center border-b border-border pb-3">
@@ -75,13 +96,29 @@ export default function OrderStatusControls({
             </button>
           )}
           {awbNumber && (
-            <button 
-              onClick={handleTrackRealtime}
-              disabled={isPending}
-              className="font-mono text-[8px] uppercase tracking-widest px-3 py-1 bg-[#059669] text-white hover:bg-[#047857] transition-colors disabled:opacity-50"
-            >
-              Track Real-time (Shiprocket)
-            </button>
+            <>
+              <button 
+                onClick={handleGenerateLabel}
+                disabled={isPending}
+                className="font-mono text-[8px] uppercase tracking-widest px-3 py-1 border border-accent text-accent hover:bg-accent/10 transition-colors disabled:opacity-50"
+              >
+                Download Label
+              </button>
+              <button 
+                onClick={handleRequestPickup}
+                disabled={isPending}
+                className="font-mono text-[8px] uppercase tracking-widest px-3 py-1 bg-white text-obsidian hover:bg-white/90 transition-colors disabled:opacity-50"
+              >
+                Request Pickup
+              </button>
+              <button 
+                onClick={handleTrackRealtime}
+                disabled={isPending}
+                className="font-mono text-[8px] uppercase tracking-widest px-3 py-1 bg-[#059669] text-white hover:bg-[#047857] transition-colors disabled:opacity-50"
+              >
+                Track Real-time
+              </button>
+            </>
           )}
         </div>
       </div>
