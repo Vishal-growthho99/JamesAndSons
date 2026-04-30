@@ -61,8 +61,11 @@ export async function createOrder(
         totalAmount,
         taxAmount: gst,
         shippingAmount: shipping,
-        shippingAddress,
-        billingAddress: shippingAddress,
+        shippingAddress: `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`,
+        shippingCity: form.city,
+        shippingState: form.state,
+        shippingPincode: form.pincode,
+        billingAddress: `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`,
         items: {
           create: cartItems.map(item => ({
             productId: item.product.id,
@@ -141,26 +144,19 @@ export async function verifyPayment(
       });
 
       if (fullOrder) {
-        const addressParts = fullOrder.shippingAddress.split(',').map(s => s.trim());
-        // Simple heuristic to split address back for API
-        const pincode = fullOrder.shippingAddress.match(/\d{6}$/)?.[0] || '';
-        const state = addressParts[addressParts.length - 1].replace(pincode, '').replace('-', '').trim();
-        const city = addressParts[addressParts.length - 2];
-        const address = addressParts.slice(0, -2).join(', ');
-
         const shiprocketParams = {
           order_id: fullOrder.orderNumber,
           order_date: fullOrder.createdAt.toISOString().split('T')[0],
           pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || "Primary",
           billing_customer_name: fullOrder.user.firstName,
           billing_last_name: fullOrder.user.lastName,
-          billing_address: address,
-          billing_city: city,
-          billing_pincode: pincode,
-          billing_state: state,
+          billing_address: fullOrder.shippingAddress.split(',').slice(0, -2).join(', ') || fullOrder.shippingAddress,
+          billing_city: fullOrder.shippingCity || '',
+          billing_pincode: fullOrder.shippingPincode || '',
+          billing_state: fullOrder.shippingState || '',
           billing_country: "India",
-          billing_email: fullOrder.user.email,
-          billing_phone: fullOrder.user.phone || '',
+          billing_email: fullOrder.user.email.trim().toLowerCase(),
+          billing_phone: fullOrder.user.phone?.replace(/\D/g, '').slice(-10) || '',
           shipping_is_billing: true,
           order_items: fullOrder.items.map(item => ({
             name: item.product.name,
@@ -187,11 +183,20 @@ export async function verifyPayment(
             data: {
               awbNumber: shipRes.shipment_id?.toString(),
               trackingNumber: shipRes.order_id?.toString(),
+              fulfillmentError: null // Clear any previous error
             }
           });
           console.log('Order successfully pushed to Shiprocket.');
         } else {
           console.error('Shiprocket Order Sync Failed:', shipRes.message);
+          await prisma.order.update({
+            where: { id: internalOrderId },
+            data: {
+              fulfillmentError: typeof shipRes.message === 'object' 
+                ? JSON.stringify(shipRes.message) 
+                : shipRes.message || 'Unknown Shiprocket Error'
+            }
+          });
         }
       }
     } catch (automationError) {

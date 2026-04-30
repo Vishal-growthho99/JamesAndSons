@@ -82,6 +82,14 @@ export default async function OrderDetailPage(props: { params: Promise<{ id: str
         <div className="bg-surface border border-border p-6">
           <h3 className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted mb-4 border-b border-border pb-2">Shipping Address</h3>
           <p className="font-body text-[13px] text-secondary leading-relaxed">{order.shippingAddress}</p>
+          
+          {order.fulfillmentError && (
+            <div className="mt-4 p-3 bg-red-900/10 border border-red-900/20 text-red-400 font-mono text-[11px] leading-relaxed">
+              <span className="font-bold uppercase tracking-widest block mb-1">⚠ Logistics Error</span>
+              {order.fulfillmentError}
+            </div>
+          )}
+
           {order.trackingNumber && (
             <div className="mt-4 pt-4 border-t border-border">
               <p className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted mb-1">Tracking ID (Shipment)</p>
