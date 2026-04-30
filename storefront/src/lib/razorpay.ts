@@ -1,22 +1,32 @@
 import Razorpay from 'razorpay';
 
-export const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || '',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || '',
-});
+let razorpayInstance: any = null;
+
+function getRazorpayInstance() {
+  if (razorpayInstance) return razorpayInstance;
+
+  const key_id = process.env.RAZORPAY_KEY_ID;
+  const key_secret = process.env.RAZORPAY_KEY_SECRET;
+
+  if (!key_id || !key_secret) {
+    throw new Error('Razorpay keys are missing in environment variables.');
+  }
+
+  razorpayInstance = new Razorpay({ key_id, key_secret });
+  return razorpayInstance;
+}
 
 /**
  * Creates a new Razorpay Order
- * @param amount Total amount IN PAISAE (e.g., ₹100 = 10000)
- * @param receipt Unique receipt ID (e.g., your internal order number)
  */
 export async function createRazorpayOrder(amount: number, receipt: string) {
   try {
-    const order = await razorpay.orders.create({
-      amount: Math.round(amount), // ensure integer
+    const rzp = getRazorpayInstance();
+    const order = await rzp.orders.create({
+      amount: Math.round(amount),
       currency: 'INR',
       receipt: receipt,
-      payment_capture: true, // auto-capture
+      payment_capture: true,
     });
     return order;
   } catch (error) {
