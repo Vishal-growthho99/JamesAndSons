@@ -153,7 +153,12 @@ export default async function OrderDetailPage(props: { params: Promise<{ id: str
       </div>
 
       {/* Status Controls */}
-      <OrderStatusControls orderId={order.id} currentStatus={order.status} />
+      <OrderStatusControls 
+        orderId={order.id} 
+        currentStatus={order.status} 
+        razorpayOrderId={order.razorpayOrderId} 
+        awbNumber={order.awbNumber}
+      />
     </div>
   );
 }

@@ -2,14 +2,26 @@
 
 import { useState, useTransition } from 'react';
 import { updateOrderStatus, updateTrackingNumber } from '../actions';
+import { syncRazorpayPayment, trackShiprocketShipment } from './logistics-actions';
 
 const STATUS_OPTIONS = ['PENDING', 'PAID', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
 
-export default function OrderStatusControls({ orderId, currentStatus }: { orderId: string, currentStatus: string }) {
+export default function OrderStatusControls({ 
+  orderId, 
+  currentStatus,
+  razorpayOrderId,
+  awbNumber
+}: { 
+  orderId: string, 
+  currentStatus: string,
+  razorpayOrderId?: string | null,
+  awbNumber?: string | null
+}) {
   const [isPending, startTransition] = useTransition();
   const [tracking, setTracking] = useState('');
-  const [awb, setAwb] = useState('');
+  const [awb, setAwb] = useState(awbNumber || '');
   const [showTracking, setShowTracking] = useState(false);
+  const [trackingData, setTrackingData] = useState<any>(null);
 
   const handleStatusUpdate = (status: string) => {
     if (status === 'SHIPPED') {
@@ -30,9 +42,49 @@ export default function OrderStatusControls({ orderId, currentStatus }: { orderI
     });
   };
 
+  const handleSyncPayment = () => {
+    if (!razorpayOrderId) return;
+    startTransition(async () => {
+      const result = await syncRazorpayPayment(orderId, razorpayOrderId);
+      if (!result.success) alert('Sync failed: ' + result.error);
+      else alert('Payment status synced successfully!');
+    });
+  };
+
+  const handleTrackRealtime = () => {
+    if (!awbNumber) return;
+    startTransition(async () => {
+      const result = await trackShiprocketShipment(awbNumber);
+      if (!result.success) alert('Tracking failed: ' + result.error);
+      else setTrackingData(result.data);
+    });
+  };
+
   return (
     <div className="bg-surface border border-border p-6 space-y-6">
-      <h3 className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted border-b border-border pb-3">Manage Order</h3>
+      <div className="flex justify-between items-center border-b border-border pb-3">
+        <h3 className="font-mono text-[9px] uppercase tracking-[0.15em] text-muted m-0">Manage Order</h3>
+        <div className="flex gap-2">
+          {currentStatus === 'PENDING' && razorpayOrderId && (
+            <button 
+              onClick={handleSyncPayment}
+              disabled={isPending}
+              className="font-mono text-[8px] uppercase tracking-widest px-3 py-1 bg-[#2563eb] text-white hover:bg-[#1d4ed8] transition-colors disabled:opacity-50"
+            >
+              Sync Razorpay Payment
+            </button>
+          )}
+          {awbNumber && (
+            <button 
+              onClick={handleTrackRealtime}
+              disabled={isPending}
+              className="font-mono text-[8px] uppercase tracking-widest px-3 py-1 bg-[#059669] text-white hover:bg-[#047857] transition-colors disabled:opacity-50"
+            >
+              Track Real-time (Shiprocket)
+            </button>
+          )}
+        </div>
+      </div>
 
       <div>
         <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-secondary mb-3">Update Status</p>
@@ -86,6 +138,32 @@ export default function OrderStatusControls({ orderId, currentStatus }: { orderI
             <button onClick={handleTrackingSubmit} disabled={isPending || !tracking} className="font-mono text-[9px] uppercase tracking-[0.12em] px-6 py-2 bg-accent text-obsidian hover:bg-[#d8b46e] transition-colors disabled:opacity-50">
               {isPending ? 'Saving...' : 'Mark as Shipped →'}
             </button>
+          </div>
+        </div>
+      )}
+
+      {trackingData && (
+        <div className="border-t border-border pt-6 space-y-4">
+          <div className="flex justify-between items-center">
+            <p className="font-mono text-[10px] uppercase tracking-[0.12em] text-secondary">Real-time Logistics Status</p>
+            <button onClick={() => setTrackingData(null)} className="text-muted hover:text-white text-[10px] font-mono">Close</button>
+          </div>
+          <div className="bg-background/50 border border-border p-4 rounded">
+            <div className="space-y-3">
+              {trackingData.shipment_track?.map((track: any, i: number) => (
+                <div key={i} className="flex gap-4 border-l-2 border-accent/30 pl-4 relative">
+                  <div className="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-accent" />
+                  <div>
+                    <p className="font-mono text-[11px] text-accent uppercase tracking-wider">{track.status}</p>
+                    <p className="font-body text-[12px] text-primary mt-1">{track.location}</p>
+                    <p className="font-mono text-[9px] text-muted mt-1">{track.date}</p>
+                  </div>
+                </div>
+              ))}
+              {!trackingData.shipment_track && (
+                <p className="font-mono text-[11px] text-muted italic">No tracking history found yet for AWB: {awbNumber}</p>
+              )}
+            </div>
           </div>
         </div>
       )}
