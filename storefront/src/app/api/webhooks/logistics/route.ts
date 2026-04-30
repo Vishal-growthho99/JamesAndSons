@@ -7,14 +7,23 @@ import { NextResponse } from 'next/server';
  */
 export async function POST(req: Request) {
   try {
-    const payload = await req.json();
-    console.log('Shiprocket Webhook Received:', payload);
+    console.log('--- Shiprocket Webhook Debug ---');
+    console.log('Headers:', Object.fromEntries(req.headers.entries()));
+
+    let payload;
+    try {
+      payload = await req.json();
+      console.log('Payload:', payload);
+    } catch (e) {
+      console.log('Empty or invalid JSON body. Responding with 200 for test ping.');
+      return NextResponse.json({ success: true, message: 'Ready to receive webhooks' });
+    }
 
     // Verify security token
     const authHeader = req.headers.get('x-api-key');
     const expectedToken = process.env.SHIPROCKET_WEBHOOK_TOKEN;
     if (expectedToken && authHeader !== expectedToken) {
-      console.warn('Unauthorized Shiprocket Webhook attempt blocked.');
+      console.warn(`Unauthorized Webhook attempt. Got: ${authHeader}, Expected: ${expectedToken}`);
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
