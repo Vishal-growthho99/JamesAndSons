@@ -14,9 +14,11 @@ export async function getShiprocketToken() {
   const password = process.env.SHIPROCKET_PASSWORD;
 
   if (!email || !password) {
-    console.warn('Shiprocket credentials missing from ENV');
+    console.error('CRITICAL: Shiprocket credentials missing from Environment Variables.');
     return null;
   }
+
+  console.log(`Attempting Shiprocket login for: ${email}`);
 
   try {
     const res = await fetch('https://apiv2.shiprocket.in/v1/external/auth/login', {
