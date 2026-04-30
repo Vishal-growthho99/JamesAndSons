@@ -820,6 +820,27 @@
     margin-right: 8px;
   }
 
+.filter-dropdown-btn {
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: var(--font-body);
+  padding: 4px 8px;
+  margin-left: -8px;
+  border-radius: 2px;
+  transition: all 0.2s;
+  color: var(--text);
+}
+.filter-dropdown-btn:hover {
+  background: var(--surface2);
+  color: var(--gold);
+}
+.filter-dropdown-btn.active {
+  color: var(--gold);
+}
+
   .filter-btn {
     padding: 6px 16px;
     background: transparent;

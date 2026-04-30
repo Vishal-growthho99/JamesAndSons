@@ -1,17 +1,59 @@
 import { prisma } from '../../lib/prisma';
 import Link from 'next/link';
+import SearchInput from '@/components/SearchInput';
+import SelectFilter from '@/components/SelectFilter';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ProductsPage() {
-  const products = await prisma.product.findMany({
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const params = await searchParams;
+  const q = typeof params.q === 'string' ? params.q : undefined;
+  const categoryId = typeof params.categoryId === 'string' ? params.categoryId : undefined;
+  const status = typeof params.status === 'string' ? params.status : undefined;
+
+  const where: any = {};
+  
+  if (q) {
+    where.OR = [
+      { name: { contains: q, mode: 'insensitive' as const } },
+      { sku: { contains: q, mode: 'insensitive' as const } }
+    ];
+  }
+
+  if (categoryId) {
+    where.categoryId = categoryId;
+  }
+
+  if (status === 'out_of_stock') {
+    where.stockQuantity = { lte: 0 };
+  } else if (status === 'active') {
+    where.stockQuantity = { gt: 0 };
+  }
+
+  const [products, categories] = await Promise.all([
+    prisma.product.findMany({
+    where,
     include: {
       category: true,
     },
     orderBy: {
       createdAt: 'desc',
     }
-  });
+  }),
+    prisma.category.findMany({
+      orderBy: { name: 'asc' }
+    })
+  ]);
+
+  const categoryOptions = categories.map(c => ({ label: c.name, value: c.id }));
+  const statusOptions = [
+    { label: 'Active', value: 'active' },
+    { label: 'Out of Stock', value: 'out_of_stock' }
+  ];
 
   return (
     <div className="space-y-6">
@@ -25,23 +67,17 @@ export default async function ProductsPage() {
 
       <div className="bg-surface border border-border shadow-sm flex flex-col">
         <div className="p-6 border-b border-border flex gap-4 bg-surface-muted/30">
-          <input 
-            type="text" 
-            placeholder="Search by Product Name or SKU..." 
-            className="w-1/3 px-4 py-2 border border-border bg-background text-primary font-body text-[13px] focus:outline-none focus:border-accent transition-colors placeholder:text-muted/50"
+          <SearchInput placeholder="Search by Product Name or SKU..." />
+          <SelectFilter 
+            paramName="categoryId" 
+            placeholder="All Categories" 
+            options={categoryOptions} 
           />
-          <select className="px-4 py-2 border border-border bg-background text-secondary font-mono text-[10px] uppercase tracking-[0.1em] focus:outline-none focus:border-accent transition-colors">
-            <option>All Categories</option>
-            <option>Modern Series</option>
-            <option>Heritage Collection</option>
-            <option>Commercial Spaces</option>
-          </select>
-          <select className="px-4 py-2 border border-border bg-background text-secondary font-mono text-[10px] uppercase tracking-[0.1em] focus:outline-none focus:border-accent transition-colors">
-            <option>Status: All</option>
-            <option>Active</option>
-            <option>Draft</option>
-            <option>Out of Stock</option>
-          </select>
+          <SelectFilter 
+            paramName="status" 
+            placeholder="Status: All" 
+            options={statusOptions} 
+          />
         </div>
 
         <div className="flex-1 table-responsive">
@@ -94,7 +130,7 @@ export default async function ProductsPage() {
                       )}
                     </td>
                     <td className="px-8 py-5 text-right">
-                      <Link href={`/products/${product.id}/edit`} className="font-mono text-[10px] uppercase tracking-[0.15em] text-accent hover:text-accent-hover transition-colors">Edit</Link>
+                      <Link prefetch={false} href={`/products/${product.id}/edit`} className="font-mono text-[10px] uppercase tracking-[0.15em] text-accent hover:text-accent-hover transition-colors">Edit</Link>
                     </td>
                   </tr>
                 );

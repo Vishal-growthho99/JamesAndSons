@@ -21,9 +21,11 @@ export default function CloudinaryUpload({
   const handleUpload = (result: any) => {
     if (result.event === 'success') {
       const url = result.info.secure_url;
-      const newImages = multiple ? [...images, url] : [url];
-      setImages(newImages);
-      onUpload(newImages);
+      setImages(prev => {
+        const newImages = multiple ? [...prev, url] : [url];
+        onUpload(newImages); // Need to call onUpload with the updated array
+        return newImages;
+      });
     }
   };
 
@@ -59,6 +61,7 @@ export default function CloudinaryUpload({
             signatureEndpoint="/api/sign-cloudinary"
             uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
             options={{
+              multiple: multiple,
               apiKey: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY
             }}
             onSuccess={handleUpload}

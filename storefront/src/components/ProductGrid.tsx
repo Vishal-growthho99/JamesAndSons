@@ -1,12 +1,32 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { formatPrice, Product } from '@/lib/utils';
 import Link from 'next/link';
 import { useCartStore } from '@/store/cart';
 
 export default function ProductGrid({ initialFilter = 'All', initialProducts }: { initialFilter?: string, initialProducts: Product[] }) {
-  const [activeFilter, setActiveFilter] = useState(initialFilter || 'All');
+  const [activeFilters, setActiveFilters] = useState<string[]>(initialFilter && initialFilter !== 'All' ? [initialFilter] : []);
+  const [showFilters, setShowFilters] = useState(false);
   const { addItem } = useCartStore();
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as HTMLElement;
+      if (!target.closest('[data-dropdown-area]')) {
+        setShowFilters(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const toggleFilter = (filter: string) => {
+    setActiveFilters(prev => 
+      prev.includes(filter) ? prev.filter(f => f !== filter) : [...prev, filter]
+    );
+  };
 
   const uniqueCollections = Array.from(new Set(initialProducts.map(p => p.collection))).filter(c => c !== 'Uncategorized').sort();
   const uniqueStyles = Array.from(new Set(initialProducts.flatMap(p => p.style || []))).filter(Boolean).sort();
@@ -15,37 +35,129 @@ export default function ProductGrid({ initialFilter = 'All', initialProducts }: 
   
   const filters = ['All', ...uniqueCollections, ...uniqueSpaces, ...uniqueStyles, ...uniqueMaterials, 'LED Certified'];
   
-  const products = activeFilter === 'All' ? initialProducts : initialProducts.filter(p =>
-    (p.collection === activeFilter) ||
-    (p.spaces && p.spaces.includes(activeFilter)) ||
-    (p.style && p.style.includes(activeFilter)) ||
-    (p.materialAndFinish && p.materialAndFinish.includes(activeFilter)) ||
-    (activeFilter === 'LED Certified' && p.isLed)
+  const products = activeFilters.length === 0 ? initialProducts : initialProducts.filter(p =>
+    activeFilters.some(filter => 
+      (p.collection === filter) ||
+      (p.spaces && p.spaces.includes(filter)) ||
+      (p.style && p.style.includes(filter)) ||
+      (p.materialAndFinish && p.materialAndFinish.includes(filter)) ||
+      (filter === 'LED Certified' && p.isLed)
+    )
   );
 
   return (
     <section className="section" id="collections">
       <div className="section-header">
         <div>
-          <div className="section-label">{activeFilter === 'All' ? 'Masterworks' : 'Curated Selection'}</div>
+          <div className="section-label">{activeFilters.length === 0 ? 'Masterworks' : 'Curated Selection'}</div>
           <h2 className="section-title">
-            {activeFilter === 'All' ? 'All Collections' : `The ${activeFilter} Collection`}
+            {activeFilters.length === 0 ? 'All Collections' : 
+             activeFilters.length === 1 ? `The ${activeFilters[0]} Collection` :
+             'Filtered Collections'}
           </h2>
         </div>
         <Link href="/collections" className="link-all">View All {products.length} Products</Link>
       </div>
 
-      <div className="filter-bar" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-        <span className="filter-label">Filter:</span>
-        {filters.map(filter => (
-          <button
-            key={filter}
-            onClick={() => setActiveFilter(filter)}
-            className={`filter-btn ${activeFilter === filter ? 'active' : ''}`}
-          >
-            {filter}
-          </button>
-        ))}
+      <div className="filter-bar-container" style={{ position: 'relative', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <button 
+              data-dropdown-area="true"
+              onClick={() => setShowFilters(!showFilters)}
+              style={{ 
+                display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', 
+                border: '1px solid var(--border)', background: showFilters ? 'var(--surface2)' : 'var(--surface)', 
+                color: 'var(--text)', cursor: 'pointer', fontFamily: 'var(--font-mono)', 
+                fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.15em', transition: 'all 0.3s ease'
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+              Filters {activeFilters.length > 0 && `(${activeFilters.length} Active)`}
+            </button>
+            
+            {activeFilters.map(filter => (
+              <div key={filter} style={{ 
+                display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', 
+                background: 'var(--surface2)', border: '1px solid var(--border)', 
+                borderRadius: '16px', fontSize: '10px', fontFamily: 'var(--font-mono)', 
+                textTransform: 'uppercase', color: 'var(--gold)', letterSpacing: '0.1em' 
+              }}>
+                {filter}
+                <button 
+                  onClick={() => toggleFilter(filter)} 
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+
+            {activeFilters.length > 0 && (
+               <button 
+                 onClick={() => { setActiveFilters([]); setShowFilters(false); }} 
+                 style={{ 
+                   background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', 
+                   fontFamily: 'var(--font-mono)', fontSize: '10px', textTransform: 'uppercase', 
+                   letterSpacing: '0.1em', padding: '10px', marginLeft: '4px'
+                 }}
+               >
+                 Clear All
+               </button>
+            )}
+          </div>
+        </div>
+
+        {showFilters && (
+          <div data-dropdown-area="true" style={{ 
+            position: 'absolute', top: '100%', left: 0, marginTop: '12px', zIndex: 50,
+            background: 'var(--surface)', border: '1px solid var(--border)', padding: '32px', width: '100%', maxWidth: '900px',
+            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '32px', boxShadow: '0 20px 40px rgba(0,0,0,0.5)'
+          }}>
+            {uniqueCollections.length > 0 && (
+              <div>
+                <h4 style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--muted)', marginBottom: '16px', borderBottom: '1px solid var(--border)', paddingBottom: '12px', fontFamily: 'var(--font-mono)' }}>Collections</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {uniqueCollections.map(c => (
+                    <button key={c} onClick={() => toggleFilter(c)} className={`filter-dropdown-btn ${activeFilters.includes(c) ? 'active' : ''}`}>{c}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {uniqueSpaces.length > 0 && (
+              <div>
+                <h4 style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--muted)', marginBottom: '16px', borderBottom: '1px solid var(--border)', paddingBottom: '12px', fontFamily: 'var(--font-mono)' }}>Spaces</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {uniqueSpaces.map(s => (
+                    <button key={s} onClick={() => toggleFilter(s)} className={`filter-dropdown-btn ${activeFilters.includes(s) ? 'active' : ''}`}>{s}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {uniqueStyles.length > 0 && (
+              <div>
+                <h4 style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--muted)', marginBottom: '16px', borderBottom: '1px solid var(--border)', paddingBottom: '12px', fontFamily: 'var(--font-mono)' }}>Styles</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {uniqueStyles.map(s => (
+                    <button key={s} onClick={() => toggleFilter(s)} className={`filter-dropdown-btn ${activeFilters.includes(s) ? 'active' : ''}`}>{s}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <h4 style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'var(--muted)', marginBottom: '16px', borderBottom: '1px solid var(--border)', paddingBottom: '12px', fontFamily: 'var(--font-mono)' }}>Materials & Features</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {uniqueMaterials.map(m => (
+                  <button key={m} onClick={() => toggleFilter(m)} className={`filter-dropdown-btn ${activeFilters.includes(m) ? 'active' : ''}`}>{m}</button>
+                ))}
+                <button onClick={() => toggleFilter('LED Certified')} className={`filter-dropdown-btn ${activeFilters.includes('LED Certified') ? 'active' : ''}`}>LED Certified</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="product-grid">
