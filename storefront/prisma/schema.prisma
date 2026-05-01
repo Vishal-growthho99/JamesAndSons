@@ -130,6 +130,9 @@ model Product {
   // Inventory
   stockQuantity    Int      @default(0)
   weight           Float?   // in kg
+  length           Float?   // in cm
+  breadth          Float?   // in cm
+  height           Float?   // in cm
   
   categoryId       String
   category         Category @relation(fields: [categoryId], references: [id])
@@ -153,6 +156,10 @@ model ProductVariant {
   b2bPrice      Float?
   stockQuantity Int      @default(0)
   images        String[]
+  weight        Float?   // in kg
+  length        Float?   // in cm
+  breadth       Float?   // in cm
+  height        Float?   // in cm
   
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -171,6 +178,9 @@ model Order {
   shippingAmount Float
   
   shippingAddress String
+  shippingCity    String?
+  shippingState   String?
+  shippingPincode String?
   billingAddress  String
   
   trackingNumber String?
@@ -180,6 +190,8 @@ model Order {
   razorpayOrderId   String?  @unique
   razorpayPaymentId String?
   razorpaySignature String?
+  
+  fulfillmentError  String?  // Logs errors from Shiprocket/Logistics
   
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -314,4 +326,3 @@ model Space {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
-
