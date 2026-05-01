@@ -33,22 +33,28 @@ export async function createOrder(
   shipping: number
 ) {
   try {
-    let user = await prisma.user.findUnique({ where: { email: form.email } });
+    const cleanEmail = form.email.trim().toLowerCase();
+    const cleanPhone = form.phone.replace(/\D/g, '').slice(-10);
+    const firstName = form.name.trim().split(' ')[0] || '';
+    const lastName = form.name.trim().split(' ').slice(1).join(' ') || 'Sons'; // Default if last name missing
+
+    let user = await prisma.user.findUnique({ where: { email: cleanEmail } });
 
     if (!user) {
       user = await prisma.user.create({
         data: {
-          email: form.email,
-          firstName: form.name.split(' ')[0] || form.name,
-          lastName: form.name.split(' ').slice(1).join(' ') || '',
+          email: cleanEmail,
+          firstName,
+          lastName,
           password: 'guest',
-          phone: form.phone,
+          phone: cleanPhone,
           role: 'CUSTOMER',
         },
       });
     }
 
-    const shippingAddress = `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`;
+    const cleanAddress = form.address.trim().replace(/[^\w\s,.-]/g, '');
+    const shippingAddress = `${cleanAddress}, ${form.city.trim()}, ${form.state.trim()} - ${form.pincode.trim()}`;
     const orderNumber = `JNS-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 100)}`;
     const totalAmount = subtotal + gst + shipping;
 
@@ -61,11 +67,11 @@ export async function createOrder(
         totalAmount,
         taxAmount: gst,
         shippingAmount: shipping,
-        shippingAddress: `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`,
-        shippingCity: form.city,
-        shippingState: form.state,
-        shippingPincode: form.pincode,
-        billingAddress: `${form.address}, ${form.city}, ${form.state} - ${form.pincode}`,
+        shippingAddress: `${cleanAddress}, ${form.city.trim()}, ${form.state.trim()} - ${form.pincode.trim()}`,
+        shippingCity: form.city.trim(),
+        shippingState: form.state.trim(),
+        shippingPincode: form.pincode.trim(),
+        billingAddress: `${cleanAddress}, ${form.city.trim()}, ${form.state.trim()} - ${form.pincode.trim()}`,
         items: {
           create: cartItems.map(item => ({
             productId: item.product.id,
