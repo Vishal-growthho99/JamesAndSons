@@ -187,6 +187,20 @@ export default function CheckoutPageInner() {
                   setOrderError('Please fill in all delivery details before continuing.');
                   return;
                 }
+
+                // Strict Email Validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(form.email)) {
+                  setOrderError('Please enter a valid email address.');
+                  return;
+                }
+
+                // Strict Phone Validation (India 10 digits)
+                const phoneClean = form.phone.replace(/\D/g, '');
+                if (phoneClean.length < 10) {
+                  setOrderError('Please enter a valid 10-digit phone number.');
+                  return;
+                }
                 
                 // Validate Pincode with Shiprocket
                 setOrderError('');
