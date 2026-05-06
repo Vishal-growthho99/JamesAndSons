@@ -9,6 +9,10 @@ type CartItem = {
     d2cPrice: number;
     mrp: number;
     gstRate: number;
+    weight?: number;
+    length?: number;
+    breadth?: number;
+    height?: number;
   };
   quantity: number;
 };

@@ -20,6 +20,8 @@ export default function CheckoutPageInner() {
 
   const subtotal = total();
   const gst = subtotal * 0.05;
+  const totalWeight = items.reduce((acc, item) => acc + (item.product.weight || 0.5) * item.quantity, 0);
+
   const [shipping, setShipping] = useState(subtotal > 50000 ? 0 : 2500);
   const [etd, setEtd] = useState('');
   const grandTotal = subtotal + gst + shipping;
@@ -32,7 +34,7 @@ export default function CheckoutPageInner() {
     if (form.pincode.length === 6 && form.pincode !== lastPincode) {
       const autofill = async () => {
         setOrderError('');
-        const res = await calculateShippingRateAction(form.pincode, 0.5, subtotal);
+        const res = await calculateShippingRateAction(form.pincode, totalWeight, subtotal);
         if (res && res.city && res.state) {
           setForm(prev => ({ ...prev, city: res.city, state: res.state }));
           setLastPincode(form.pincode);
@@ -40,7 +42,7 @@ export default function CheckoutPageInner() {
       };
       autofill();
     }
-  }, [form.pincode, subtotal, lastPincode]);
+  }, [form.pincode, subtotal, lastPincode, totalWeight]);
 
   if (items.length === 0 && step !== 3) {
     return (
@@ -247,7 +249,7 @@ export default function CheckoutPageInner() {
                   const check = await validatePincodeDelivery(form.pincode);
                   if (check.serviceable) {
                     // Fetch dynamic shipping rate
-                    const rateData = await calculateShippingRateAction(form.pincode, 5.0, subtotal);
+                    const rateData = await calculateShippingRateAction(form.pincode, totalWeight, subtotal);
                     if (rateData) {
                       setShipping(rateData.rate);
                       setEtd(rateData.etd);
