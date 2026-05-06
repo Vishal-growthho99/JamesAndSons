@@ -208,8 +208,9 @@ export async function getShippingRates(deliveryPincode: string, weightKg: number
   if (!token) return null;
 
   try {
+    const pickupPincode = process.env.STORE_PICKUP_PINCODE || '202001';
     const res = await fetch(
-      `https://apiv2.shiprocket.in/v1/external/courier/serviceability/?pickup_postcode=110001&delivery_postcode=${deliveryPincode}&weight=${weightKg}&cod=0`,
+      `https://apiv2.shiprocket.in/v1/external/courier/serviceability/?pickup_postcode=${pickupPincode}&delivery_postcode=${deliveryPincode}&weight=${weightKg}&cod=0`,
       {
         headers: { Authorization: `Bearer ${token}` },
         cache: 'no-store'
