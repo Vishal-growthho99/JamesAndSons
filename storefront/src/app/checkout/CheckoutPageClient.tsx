@@ -218,6 +218,12 @@ export default function CheckoutPageInner() {
                   return;
                 }
                 
+                // Strict Address Validation
+                if (form.address.trim().length < 5) {
+                  setOrderError('Please enter a more detailed street address (minimum 5 characters).');
+                  return;
+                }
+                
                 // Validate Pincode with Shiprocket
                 setOrderError('');
                 setLoading(true);
