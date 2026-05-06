@@ -172,14 +172,30 @@ export default function CheckoutPageInner() {
               ))}
               <div style={{ gridColumn: '1 / -1' }}>
                 <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Street Address <span style={{ color: 'var(--red)' }}>*</span></label>
-                <input required value={form.address} onChange={e => update('address', e.target.value)} style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '13px', padding: '9px 12px', outline: 'none', width: '100%' }} />
+                <input required placeholder="House No, Street, Area" value={form.address} onChange={e => update('address', e.target.value)} style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '13px', padding: '9px 12px', outline: 'none', width: '100%' }} />
               </div>
-              {[{ key: 'city', label: 'City' }, { key: 'state', label: 'State' }, { key: 'pincode', label: 'Pincode' }].map(f => (
-                <div key={f.key}>
-                  <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>{f.label} <span style={{ color: 'var(--red)' }}>*</span></label>
-                  <input required value={(form as any)[f.key]} onChange={e => update(f.key, e.target.value)} style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '13px', padding: '9px 12px', outline: 'none', width: '100%' }} />
-                </div>
-              ))}
+              <div>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>City <span style={{ color: 'var(--red)' }}>*</span></label>
+                <input required placeholder="City Name" value={form.city} onChange={e => update('city', e.target.value)} style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '13px', padding: '9px 12px', outline: 'none', width: '100%' }} />
+              </div>
+              <div>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>State <span style={{ color: 'var(--red)' }}>*</span></label>
+                <select 
+                  required 
+                  value={form.state} 
+                  onChange={e => update('state', e.target.value)} 
+                  style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '13px', padding: '8px 12px', outline: 'none', width: '100%', height: '39px' }}
+                >
+                  <option value="">Select State</option>
+                  {["Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"].map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Pincode <span style={{ color: 'var(--red)' }}>*</span></label>
+                <input required placeholder="6 Digits" maxLength={6} value={form.pincode} onChange={e => update('pincode', e.target.value)} style={{ background: 'var(--surface2)', border: '1px solid var(--border)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '13px', padding: '9px 12px', outline: 'none', width: '100%' }} />
+              </div>
             </div>
             <button 
               onClick={async () => {

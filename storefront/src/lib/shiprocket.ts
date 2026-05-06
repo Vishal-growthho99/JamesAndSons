@@ -82,6 +82,22 @@ export async function checkPincodeServiceability(pickupPostcode: string, deliver
 /**
  * Creates a Shiprocket Custom Order
  */
+export async function getPickupLocations() {
+  const token = await getShiprocketToken();
+  if (!token) return null;
+
+  try {
+    const res = await fetch('https://apiv2.shiprocket.in/v1/external/settings/get/pickup/locations', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error('Failed to fetch pickup locations:', error);
+    return null;
+  }
+}
+
 export async function createShiprocketOrder(params: any) {
   const token = await getShiprocketToken();
   if (!token) return { success: false, message: 'Logistics service unavailable' };
