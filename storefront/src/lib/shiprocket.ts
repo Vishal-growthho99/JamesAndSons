@@ -220,16 +220,24 @@ export async function getShippingRates(deliveryPincode: string, weightKg: number
     if (data.status === 200 && data.data?.available_courier_companies) {
       const couriers = data.data.available_courier_companies;
       // Get the cheapest or recommended rate
-      const rate = couriers[0].rate;
+      const firstCourier = couriers[0];
+      const rate = firstCourier.rate;
       
+      // Get city/state from the first courier (destination info)
+      // Note: Shiprocket returns these in the courier objects
+      const city = firstCourier.city || '';
+      const state = firstCourier.state || '';
+
       // Apply custom logic: free shipping over 50k, or add 15% handling margin
       let finalRate = rate * 1.15; // 15% markup
       if (subtotal > 50000) finalRate = 0;
 
       return {
         rate: Math.ceil(finalRate),
-        etd: couriers[0].etd,
-        courierName: couriers[0].courier_name
+        etd: firstCourier.etd,
+        courierName: firstCourier.courier_name,
+        city,
+        state
       };
     }
     return null;

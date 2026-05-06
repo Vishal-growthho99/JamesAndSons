@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCartStore } from '@/store/cart';
 import { formatPrice } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
@@ -25,6 +25,22 @@ export default function CheckoutPageInner() {
   const grandTotal = subtotal + gst + shipping;
 
   const update = (key: string, val: string) => setForm(prev => ({ ...prev, [key]: val }));
+  const [lastPincode, setLastPincode] = useState('');
+
+  // Smart Autofill based on Pincode
+  useEffect(() => {
+    if (form.pincode.length === 6 && form.pincode !== lastPincode) {
+      const autofill = async () => {
+        setOrderError('');
+        const res = await calculateShippingRateAction(form.pincode, 0.5, subtotal);
+        if (res && res.city && res.state) {
+          setForm(prev => ({ ...prev, city: res.city, state: res.state }));
+          setLastPincode(form.pincode);
+        }
+      };
+      autofill();
+    }
+  }, [form.pincode, subtotal, lastPincode]);
 
   if (items.length === 0 && step !== 3) {
     return (
