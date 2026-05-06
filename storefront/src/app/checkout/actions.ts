@@ -40,7 +40,7 @@ export async function createOrder(
     const cleanEmail = form.email.trim().toLowerCase();
     const cleanPhone = form.phone.replace(/\D/g, '').slice(-10);
     const firstName = form.name.trim().split(' ')[0] || '';
-    const lastName = form.name.trim().split(' ').slice(1).join(' ') || 'Sons'; // Default if last name missing
+    const lastName = form.name.trim().split(' ').slice(1).join(' ') || '.'; // Use a dot as default for Shiprocket compatibility
 
     let user = await prisma.user.findUnique({ where: { email: cleanEmail } });
 
