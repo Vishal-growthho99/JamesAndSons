@@ -273,29 +273,43 @@ export default function CheckoutPageInner() {
           </div>
         )}
 
-        {/* Step 2 — Payment */}
+        {/* Step 2 — Final Review & Pay */}
         {step === 2 && (
           <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', padding: '28px' }}>
-            <div className="section-label" style={{ marginBottom: '20px', paddingBottom: '14px', borderBottom: '1px solid var(--border)' }}>Payment Method</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '28px' }}>
-              {[
-                { id: 'upi', label: 'UPI / GPay / PhonePe', icon: '⚡' },
-                { id: 'card', label: 'Credit / Debit Card', icon: '💳' },
-                { id: 'netbanking', label: 'Net Banking', icon: '🏦' },
-                { id: 'emi', label: 'EMI (6/12/18 months)', icon: '📅' },
-              ].map(method => (
-                <label key={method.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 18px', border: `1px solid ${form.paymentMethod === method.id ? 'var(--gold)' : 'var(--border)'}`, background: form.paymentMethod === method.id ? 'rgba(196,160,90,0.06)' : 'var(--surface2)', cursor: 'pointer', transition: 'all 0.15s' }}>
-                  <input type="radio" name="payment" value={method.id} checked={form.paymentMethod === method.id} onChange={() => update('paymentMethod', method.id)} style={{ accentColor: 'var(--gold)' }} />
-                  <span style={{ fontSize: '18px' }}>{method.icon}</span>
-                  <span style={{ fontFamily: 'var(--font-body)', fontSize: '14px', color: 'var(--text)' }}>{method.label}</span>
-                </label>
-              ))}
+            <div className="section-label" style={{ marginBottom: '20px', paddingBottom: '14px', borderBottom: '1px solid var(--border)' }}>Final Review</div>
+            
+            <div style={{ marginBottom: '28px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ padding: '16px', background: 'var(--surface2)', border: '1px solid var(--border)' }}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>Shipping To</div>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--text)' }}>
+                    <strong>{form.name}</strong><br />
+                    {form.address}, {form.city}, {form.state} - {form.pincode}
+                  </div>
+                </div>
+                
+                <div style={{ padding: '16px', background: 'var(--surface2)', border: '1px solid var(--border)' }}>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '8px' }}>Delivery Estimate</div>
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--green)' }}>
+                    {etd ? `Arriving by ${etd}` : 'Ships within 24-48 hours'}
+                  </div>
+                </div>
+              </div>
             </div>
+
             <div style={{ padding: '14px 18px', background: 'rgba(196,160,90,0.04)', border: '1px solid var(--border-gold)', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.08em', color: 'var(--text-muted)', marginBottom: '20px' }}>
-              🔒 Payments secured by Razorpay. Your card details are never stored on our servers.
+              🔒 Secure payment powered by Razorpay. All major UPI, Cards, and Net Banking apps are supported.
             </div>
+            
             <button onClick={handlePayment} disabled={loading} className="btn-primary" style={{ width: '100%', padding: '14px 32px', letterSpacing: '0.15em', opacity: loading ? 0.7 : 1, whiteSpace: 'nowrap' }}>
-              {loading ? 'Processing Payment...' : `Pay ${formatPrice(grandTotal)} →`}
+              {loading ? 'Opening Gateway...' : `Complete Secure Payment →`}
+            </button>
+            
+            <button 
+              onClick={() => setStep(1)} 
+              style={{ width: '100%', marginTop: '12px', background: 'transparent', border: 'none', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', fontSize: '10px', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.1em' }}
+            >
+              ← Edit Delivery Details
             </button>
           </div>
         )}
