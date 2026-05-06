@@ -126,6 +126,41 @@ export async function createShiprocketOrder(params: any) {
     return { success: false, message: 'API Call Failed' };
   }
 }
+
+/**
+ * Assign an AWB (Tracking Number) to a shipment
+ */
+export async function assignAWB(shipmentId: number) {
+  const token = await getShiprocketToken();
+  if (!token) return { success: false, message: 'Logistics service unavailable' };
+
+  try {
+    const res = await fetch('https://apiv2.shiprocket.in/v1/external/courier/assign/awb', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}` 
+      },
+      body: JSON.stringify({ shipment_id: shipmentId }),
+      cache: 'no-store'
+    });
+
+    const data = await res.json();
+    if (data.status === 200 || data.awb_assign_status === 1) {
+      return { 
+        success: true, 
+        awb_code: data.response.data.awb_code,
+        courier_name: data.response.data.courier_name
+      };
+    } else {
+      console.error('AWB Assignment Failed:', data);
+      return { success: false, message: data.message || 'AWB Assignment failed' };
+    }
+  } catch (err) {
+    console.error('assignAWB Error:', err);
+    return { success: false, message: 'API Call Failed' };
+  }
+}
 /**
  * Synchronize a product (and its variants) with Shiprocket's catalogue
  */

@@ -188,15 +188,21 @@ export async function verifyPayment(
         console.log('Shiprocket Response:', JSON.stringify(shipRes, null, 2));
 
         if (shipRes.success) {
+          // STEP 2: Automatically assign AWB (Courier)
+          const awbRes = await assignAWB(shipRes.shipment_id);
+          
           await prisma.order.update({
             where: { id: internalOrderId },
             data: {
+              trackingNumber: awbRes.success ? awbRes.awb_code : null,
               awbNumber: shipRes.shipment_id?.toString(),
-              trackingNumber: shipRes.order_id?.toString(),
-              fulfillmentError: null // Clear any previous error
+              fulfillmentError: awbRes.success ? null : `Order created, but AWB failed: ${awbRes.message}`
             }
           });
-          console.log('Order successfully pushed to Shiprocket.');
+          
+          if (awbRes.success) {
+            console.log(`Order pushed and AWB assigned: ${awbRes.awb_code}`);
+          }
         } else {
           console.error('Shiprocket Order Sync Failed:', shipRes.message);
           await prisma.order.update({
@@ -221,7 +227,7 @@ export async function verifyPayment(
   }
 }
 
-import { checkPincodeServiceability, getShippingRates, createShiprocketOrder } from '@/lib/shiprocket';
+import { checkPincodeServiceability, getShippingRates, createShiprocketOrder, assignAWB } from '@/lib/shiprocket';
 
 export async function validatePincodeDelivery(pincode: string) {
   try {
