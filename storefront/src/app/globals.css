@@ -87,3 +87,21 @@ body {
 .cms-content li {
   margin-bottom: 8px;
 }
+
+/* Footer Support Button */
+.btn-support-ticket {
+  display: inline-block;
+  border: 1px solid var(--gold);
+  padding: 10px 20px;
+  color: var(--gold);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+.btn-support-ticket:hover {
+  background-color: var(--gold);
+  color: var(--obsidian);
+}
