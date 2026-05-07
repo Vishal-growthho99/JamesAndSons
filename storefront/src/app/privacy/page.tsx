@@ -1,6 +1,8 @@
 import Navigation from '@/components/Navigation'
 import { prisma } from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PrivacyPage() {
   const page = await prisma.page.findUnique({
     where: { slug: 'privacy' }
