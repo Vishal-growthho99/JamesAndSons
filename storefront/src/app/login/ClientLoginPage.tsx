@@ -220,7 +220,7 @@ export default function ClientLoginPage({ searchParams, referer }: Props) {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <button 
                   type="button" 
-                  onClick={() => signInWithSocial('google')}
+                  onClick={() => signInWithSocial('google', nextUrl)}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                     padding: '10px', background: 'var(--surface)', border: '1px solid var(--border)',
@@ -235,7 +235,7 @@ export default function ClientLoginPage({ searchParams, referer }: Props) {
                 </button>
                 <button 
                   type="button" 
-                  onClick={() => signInWithSocial('facebook')}
+                  onClick={() => signInWithSocial('facebook', nextUrl)}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                     padding: '10px', background: 'var(--surface)', border: '1px solid var(--border)',
