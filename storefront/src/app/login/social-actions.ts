@@ -11,6 +11,9 @@ export async function signInWithSocial(provider: Provider, next: string = '/') {
     provider,
     options: {
       redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+      queryParams: {
+        prompt: 'select_account',
+      },
     },
   })
 
