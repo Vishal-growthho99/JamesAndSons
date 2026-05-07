@@ -61,7 +61,7 @@ export default async function PagesDashboard() {
                     <Link href={`/pages/${page.id}`} className="font-mono text-[10px] uppercase tracking-[0.15em] text-accent hover:text-white transition-colors">
                       Edit
                     </Link>
-                    <a href={`http://localhost:3000/${page.slug}`} target="_blank" rel="noreferrer" className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted hover:text-white transition-colors">
+                    <a href={`${process.env.NEXT_PUBLIC_STOREFRONT_URL || 'http://localhost:3001'}/${page.slug}`} target="_blank" rel="noreferrer" className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted hover:text-white transition-colors">
                       View
                     </a>
                   </td>

@@ -44,3 +44,46 @@ body {
 .font-serif { font-family: var(--font-serif); }
 .font-mono { font-family: var(--font-mono); }
 .font-body { font-family: var(--font-body); }
+
+/* CMS Content Styles */
+.cms-content h2 {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--gold-light);
+  margin-top: 48px;
+  margin-bottom: 24px;
+}
+
+.cms-content h3 {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 300;
+  color: var(--gold);
+  margin-top: 32px;
+  margin-bottom: 16px;
+}
+
+.cms-content p {
+  margin-bottom: 20px;
+}
+
+.cms-content a {
+  color: var(--gold);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+.cms-content a:hover {
+  border-bottom-color: var(--gold);
+}
+
+.cms-content ul, .cms-content ol {
+  margin-bottom: 24px;
+  padding-left: 20px;
+}
+
+.cms-content li {
+  margin-bottom: 8px;
+}

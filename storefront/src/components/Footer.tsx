@@ -43,6 +43,34 @@ export default function Footer() {
               <li><Link href="/returns" className="footer-link">Returns</Link></li>
             </ul>
           </div>
+
+          <div>
+            <h4 style={{ color: 'var(--text)', marginBottom: '16px', textTransform: 'uppercase' }}>Support</h4>
+            <Link 
+              href="/account/tickets" 
+              style={{ 
+                display: 'inline-block', 
+                border: '1px solid var(--gold)', 
+                padding: '10px 20px', 
+                color: 'var(--gold)', 
+                textDecoration: 'none',
+                transition: 'all 0.3s ease',
+                fontSize: '10px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.2em'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--gold)';
+                e.currentTarget.style.color = 'var(--obsidian)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'var(--gold)';
+              }}
+            >
+              Raise a Ticket
+            </Link>
+          </div>
           
         </div>
         
