@@ -230,16 +230,51 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-6 mb-6">
-          <div><label className={labelCls}>Actual Height (in)</label><input type="number" step="0.1" name="actualHeight" defaultValue={defaultValues?.actualHeight} className={inputCls} placeholder='e.g. 39"' /></div>
-          <div><label className={labelCls}>Actual Width (in)</label><input type="number" step="0.1" name="actualWidth" defaultValue={defaultValues?.actualWidth} className={inputCls} placeholder='e.g. 40"' /></div>
-          <div><label className={labelCls}>Actual Depth (in)</label><input type="number" step="0.1" name="actualDepth" defaultValue={defaultValues?.actualDepth} className={inputCls} placeholder='e.g. 12"' /></div>
-          <div><label className={labelCls}>Material & Finish</label><input name="materialAndFinish" defaultValue={defaultValues?.materialAndFinish?.join(', ')} className={inputCls} placeholder="e.g. Metal, Black finish" /></div>
-        </div>
+        <div className="bg-surface-muted/20 p-6 border border-border space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-1 h-4 bg-accent"></div>
+                <h4 className="font-mono text-[10px] uppercase tracking-widest text-primary">Core Attributes</h4>
+              </div>
+              <div className="space-y-3">
+                <div><label className={labelCls}>Material & Finish</label><input name="materialAndFinish" defaultValue={defaultValues?.materialAndFinish?.join(', ')} className={inputCls} placeholder="e.g. Brass, Matte Black" /></div>
+                <div><label className={labelCls}>Bulb Type</label><input name="bulbType" defaultValue={defaultValues?.bulbType?.join(', ')} className={inputCls} placeholder="e.g. E14, Integrated LED" /></div>
+                <div><label className={labelCls}>Design Style</label><input name="style" defaultValue={defaultValues?.style?.join(', ')} className={inputCls} placeholder="e.g. Contemporary, Art Deco" /></div>
+              </div>
+            </div>
 
-        <div className="grid grid-cols-3 gap-6 mb-6">
-          <div><label className={labelCls}>Bulb Type</label><input name="bulbType" defaultValue={defaultValues?.bulbType?.join(', ')} className={inputCls} placeholder="e.g. E12, LED" /></div>
-          <div><label className={labelCls}>Style</label><input name="style" defaultValue={defaultValues?.style?.join(', ')} className={inputCls} placeholder="e.g. Traditional, Rustic" /></div>
+            <div className="md:col-span-2 space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-1 h-4 bg-accent"></div>
+                <h4 className="font-mono text-[10px] uppercase tracking-widest text-primary">Physical Dimensions (Display)</h4>
+              </div>
+              <div className="grid grid-cols-3 gap-6 bg-background/50 p-4 border border-border">
+                <div>
+                  <label className={labelCls}>Height (in)</label>
+                  <div className="relative">
+                    <input type="number" step="0.1" name="actualHeight" defaultValue={defaultValues?.actualHeight} className={`${inputCls} !pr-8`} placeholder="0.0" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[10px] text-muted">"</span>
+                  </div>
+                </div>
+                <div>
+                  <label className={labelCls}>Width (in)</label>
+                  <div className="relative">
+                    <input type="number" step="0.1" name="actualWidth" defaultValue={defaultValues?.actualWidth} className={`${inputCls} !pr-8`} placeholder="0.0" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[10px] text-muted">"</span>
+                  </div>
+                </div>
+                <div>
+                  <label className={labelCls}>Depth (in)</label>
+                  <div className="relative">
+                    <input type="number" step="0.1" name="actualDepth" defaultValue={defaultValues?.actualDepth} className={`${inputCls} !pr-8`} placeholder="Optional" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[10px] text-muted">"</span>
+                  </div>
+                </div>
+                <p className="col-span-3 font-mono text-[8px] text-muted uppercase tracking-widest">Note: Depth is optional. If left blank, it will be hidden on the storefront.</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -250,10 +285,12 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
             </button>
           </div>
           {specs.map((spec, i) => (
-            <div key={i} className="flex gap-3 items-center">
-              <input value={spec.key} onChange={e => updateSpec(i, 'key', e.target.value)} placeholder="Key (e.g. Material)" className={`${inputCls} w-1/3`} />
-              <input value={spec.value} onChange={e => updateSpec(i, 'value', e.target.value)} placeholder="Value (e.g. Brass)" className={`${inputCls} flex-1`} />
-              <button type="button" onClick={() => removeSpec(i)} className="text-red-400/60 hover:text-red-400 font-mono text-[16px] px-2 flex-shrink-0">×</button>
+            <div key={i} className="flex gap-3 items-center animate-in fade-in slide-in-from-left-2 duration-200">
+              <input value={spec.key} onChange={e => updateSpec(i, 'key', e.target.value)} placeholder="Key (e.g. Finish)" className={`${inputCls} w-1/4 !py-2 !text-[12px]`} />
+              <input value={spec.value} onChange={e => updateSpec(i, 'value', e.target.value)} placeholder="Value (e.g. Polished Brass)" className={`${inputCls} flex-1 !py-2 !text-[12px]`} />
+              <button type="button" onClick={() => removeSpec(i)} className="btn-ghost !text-red-400 hover:!bg-red-400/10 !p-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
             </div>
           ))}
           {specs.length === 0 && <p className="text-muted font-mono text-[11px]">No specs yet — click "Add Spec" to add filterable attributes like Material, Finish, Diameter, etc.</p>}
