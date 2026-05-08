@@ -36,17 +36,90 @@ export default async function CMSPage(props: { params: Promise<{ slug: string }>
   return (
     <>
       <Navigation />
-      <main style={{ paddingTop: '80px', minHeight: '100vh', background: 'var(--obsidian)' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '64px 24px' }}>
-          <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '42px', fontWeight: 300, color: 'var(--gold-light)', marginBottom: '40px', textAlign: 'center' }}>
-            {page.title}
-          </h1>
+      <main 
+        style={{ 
+          paddingTop: '80px', 
+          minHeight: '100vh', 
+          background: params.slug === 'about' 
+            ? 'linear-gradient(to bottom, var(--void), var(--obsidian))' 
+            : 'var(--obsidian)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+      >
+        {params.slug === 'about' && (
+          <div 
+            style={{ 
+              position: 'absolute', 
+              top: 0, 
+              left: 0, 
+              right: 0, 
+              height: '400px', 
+              background: 'radial-gradient(circle at 50% -20%, var(--gold-pale) 0%, transparent 70%)',
+              opacity: 0.1,
+              pointerEvents: 'none'
+            }} 
+          />
+        )}
+        
+        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '80px 24px', position: 'relative', zIndex: 1 }}>
+          <div 
+            style={{ 
+              textAlign: 'center', 
+              marginBottom: '60px',
+              animation: 'fadeInUp 1s ease-out' 
+            }}
+          >
+            <div 
+              style={{ 
+                fontFamily: 'var(--font-mono)', 
+                fontSize: '10px', 
+                textTransform: 'uppercase', 
+                letterSpacing: '0.4em', 
+                color: 'var(--gold)', 
+                marginBottom: '16px',
+                opacity: 0.8
+              }}
+            >
+              {params.slug === 'about' ? 'The Heritage' : 'Information'}
+            </div>
+            <h1 
+              style={{ 
+                fontFamily: 'var(--font-serif)', 
+                fontSize: params.slug === 'about' ? '64px' : '48px', 
+                fontWeight: 300, 
+                color: 'var(--gold-light)', 
+                margin: 0,
+                lineHeight: 1.1
+              }}
+            >
+              {page.title}
+            </h1>
+          </div>
+
           <div 
             className="cms-content"
-            style={{ fontFamily: 'var(--font-body)', fontSize: '15px', lineHeight: 1.8, color: 'var(--text)' }}
+            style={{ 
+              fontFamily: 'var(--font-body)', 
+              fontSize: '16px', 
+              lineHeight: 1.9, 
+              color: 'var(--text-muted)',
+              animation: 'fadeIn 1.2s ease-out'
+            }}
             dangerouslySetInnerHTML={{ __html: page.content }}
           />
         </div>
+
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+        `}} />
       </main>
     </>
   );

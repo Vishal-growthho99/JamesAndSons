@@ -43,6 +43,16 @@ export default function Footer() {
               <li><Link href="/returns" className="footer-link">Returns</Link></li>
             </ul>
           </div>
+
+          <div>
+            <h4 style={{ color: 'var(--text)', marginBottom: '16px', textTransform: 'uppercase' }}>Support</h4>
+            <Link 
+              href="/account/tickets" 
+              className="btn-support-ticket"
+            >
+              Raise a Ticket
+            </Link>
+          </div>
           
         </div>
         

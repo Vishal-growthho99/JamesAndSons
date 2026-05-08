@@ -22,9 +22,10 @@ export default function CheckoutPageInner() {
   const gst = subtotal * 0.05;
   const totalWeight = items.reduce((acc, item) => acc + (item.product.weight || 0.5) * item.quantity, 0);
 
-  const [shipping, setShipping] = useState(subtotal > 50000 ? 0 : 2500);
+  const [shipping, setShipping] = useState<number | null>(null);
+  const [shippingCalculated, setShippingCalculated] = useState(false);
   const [etd, setEtd] = useState('');
-  const grandTotal = subtotal + gst + shipping;
+  const grandTotal = subtotal + gst + (shipping || 0);
 
   const update = (key: string, val: string) => setForm(prev => ({ ...prev, [key]: val }));
   const [lastPincode, setLastPincode] = useState('');
@@ -62,7 +63,7 @@ export default function CheckoutPageInner() {
         items.map(i => ({ product: i.product, quantity: i.quantity })),
         subtotal,
         gst,
-        shipping
+        shipping || 0
       );
       
       if (!result.success || !result.razorpayOrderId) {
@@ -139,29 +140,29 @@ export default function CheckoutPageInner() {
         <p style={{ fontFamily: 'var(--font-body)', fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.7, marginBottom: '32px' }}>
           A GST invoice and tracking info will be sent to your email. Our installation team will reach out to schedule delivery.
         </p>
-        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <a href="/account" className="btn-primary" style={{ textDecoration: 'none', padding: '12px 28px', whiteSpace: 'nowrap' }}>View My Orders</a>
-          <a href="/collections" className="btn-outline" style={{ textDecoration: 'none', padding: '12px 28px', whiteSpace: 'nowrap' }}>Continue Shopping</a>
+        <div style={{ display: 'flex', gap: '12px', rowGap: '16px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '24px' }}>
+          <a href="/account" className="btn-primary" style={{ textDecoration: 'none', padding: '12px 28px', whiteSpace: 'nowrap', minWidth: '180px' }}>View My Orders</a>
+          <a href="/collections" className="btn-outline" style={{ textDecoration: 'none', padding: '12px 28px', whiteSpace: 'nowrap', minWidth: '180px' }}>Continue Shopping</a>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="checkout-wrapper">
+    <div className="checkout-layout">
 
       {/* Left — steps */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+      <div className="checkout-main" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
 
         {/* Step indicators */}
-        <div style={{ display: 'flex', gap: '0', marginBottom: '4px', border: '1px solid var(--border)', background: 'var(--surface)' }}>
+        <div style={{ display: 'flex', gap: '0', marginBottom: '4px', border: '1px solid var(--border)', background: 'var(--surface)', flexWrap: 'wrap' }}>
           {[{ n: 1, label: 'Delivery Details' }, { n: 2, label: 'Payment' }].map(s => (
-            <div key={s.n} style={{ flex: 1, padding: '14px 20px', background: step === s.n ? 'rgba(196,160,90,0.08)' : 'transparent', borderRight: s.n === 1 ? '1px solid var(--border)' : 'none', cursor: step > s.n ? 'pointer' : 'default' }} onClick={() => step > s.n && setStep(s.n as 1 | 2)}>
+            <div key={s.n} style={{ flex: '1 1 200px', padding: '14px 20px', background: step === s.n ? 'rgba(196,160,90,0.08)' : 'transparent', borderRight: s.n === 1 ? '1px solid var(--border)' : 'none', borderBottom: s.n === 1 && step === 1 ? 'none' : 'none', cursor: step > s.n ? 'pointer' : 'default' }} onClick={() => step > s.n && setStep(s.n as 1 | 2)}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{ width: '24px', height: '24px', borderRadius: '50%', border: `1px solid ${step >= s.n ? 'var(--gold)' : 'var(--border)'}`, background: step > s.n ? 'var(--gold)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: '11px', color: step > s.n ? 'var(--obsidian)' : step === s.n ? 'var(--gold)' : 'var(--text-dim)', flexShrink: 0 }}>
                   {step > s.n ? '✓' : s.n}
                 </div>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: step === s.n ? 'var(--gold)' : 'var(--text-muted)' }}>{s.label}</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', textTransform: 'uppercase', color: step === s.n ? 'var(--gold)' : 'var(--text-muted)', whiteSpace: 'nowrap' }}>{s.label}</span>
               </div>
             </div>
           ))}
@@ -253,6 +254,11 @@ export default function CheckoutPageInner() {
                     if (rateData) {
                       setShipping(rateData.rate);
                       setEtd(rateData.etd);
+                      setShippingCalculated(true);
+                    } else {
+                      // Fallback if Shiprocket fails but pincode is serviceable
+                      setShipping(subtotal > 50000 ? 0 : 2500);
+                      setShippingCalculated(true);
                     }
                     setStep(2);
                   } else {
@@ -316,7 +322,7 @@ export default function CheckoutPageInner() {
       </div>
 
       {/* Right — Order Summary */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', position: 'sticky', top: '80px' }} className="checkout-aside">
+      <div className="checkout-aside" style={{ display: 'flex', flexDirection: 'column', gap: '2px', position: 'sticky', top: '80px', height: 'fit-content' }}>
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', padding: '24px' }}>
           <div className="section-label" style={{ marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid var(--border)' }}>Order Summary</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>
@@ -331,7 +337,7 @@ export default function CheckoutPageInner() {
             ))}
           </div>
           <div style={{ borderTop: '1px solid var(--border)', paddingTop: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {[['Subtotal', formatPrice(subtotal)], ['GST (~5%)', formatPrice(gst)], ['Shipping', shipping === 0 ? 'FREE' : formatPrice(shipping)]].map(([l, v]) => (
+            {[['Subtotal', formatPrice(subtotal)], ['GST (~5%)', formatPrice(gst)], ['Shipping', shipping === null ? (subtotal > 50000 ? 'FREE' : 'Calculated next') : (shipping === 0 ? 'FREE' : formatPrice(shipping))]].map(([l, v]) => (
               <div key={l} style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
                 <span>{l}</span><span style={{ color: v === 'FREE' ? 'var(--green)' : 'inherit' }}>{v}</span>
               </div>
