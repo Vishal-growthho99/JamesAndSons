@@ -16,6 +16,9 @@ type Variant = {
   length: string;
   breadth: string;
   height: string;
+  actualHeight: string;
+  actualWidth: string;
+  actualDepth: string;
 };
 type Spec = { key: string; value: string };
 
@@ -50,6 +53,9 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
       length: String(v.length || ''),
       breadth: String(v.breadth || ''),
       height: String(v.height || ''),
+      actualHeight: String(v.actualHeight || ''),
+      actualWidth: String(v.actualWidth || ''),
+      actualDepth: String(v.actualDepth || ''),
     })) || []
   );
   const addVariant = () => setVariants(prev => [...prev, { 
@@ -62,7 +68,10 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
     weight: '',
     length: '',
     breadth: '',
-    height: ''
+    height: '',
+    actualHeight: '',
+    actualWidth: '',
+    actualDepth: ''
   }]);
   const updateVariant = (i: number, field: keyof Variant, val: string) => setVariants(prev => prev.map((v, idx) => idx === i ? { ...v, [field]: val } : v));
   const removeVariant = (i: number) => setVariants(prev => prev.filter((_, idx) => idx !== i));
@@ -100,7 +109,9 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
       gstRate: parseFloat(fd.get('gstRate') as string) || 18,
       hsnCode: fd.get('hsnCode'),
       bisCertification: fd.get('bisCertification'),
-      dimensions: fd.get('dimensions'),
+      actualHeight: fd.get('actualHeight') ? parseFloat(fd.get('actualHeight') as string) : null,
+      actualWidth: fd.get('actualWidth') ? parseFloat(fd.get('actualWidth') as string) : null,
+      actualDepth: fd.get('actualDepth') ? parseFloat(fd.get('actualDepth') as string) : null,
       materialAndFinish: fd.get('materialAndFinish') ? (fd.get('materialAndFinish') as string).split(',').map(s => s.trim()).filter(Boolean) : [],
       bulbType: fd.get('bulbType') ? (fd.get('bulbType') as string).split(',').map(s => s.trim()).filter(Boolean) : [],
       style: fd.get('style') ? (fd.get('style') as string).split(',').map(s => s.trim()).filter(Boolean) : [],
@@ -116,6 +127,9 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
         length: v.length ? parseFloat(v.length) : null,
         breadth: v.breadth ? parseFloat(v.breadth) : null,
         height: v.height ? parseFloat(v.height) : null,
+        actualHeight: (v.actualHeight && v.actualHeight.trim()) ? parseFloat(v.actualHeight) : null,
+        actualWidth: (v.actualWidth && v.actualWidth.trim()) ? parseFloat(v.actualWidth) : null,
+        actualDepth: (v.actualDepth && v.actualDepth.trim()) ? parseFloat(v.actualDepth) : null,
       })),
       specs: specs.reduce((acc: any, s) => { if (s.key) acc[s.key] = s.value; return acc; }, {}),
     };
@@ -216,11 +230,51 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-6 mb-6">
-          <div><label className={labelCls}>Dimensions</label><input name="dimensions" defaultValue={defaultValues?.dimensions} className={inputCls} placeholder='e.g. 39" (H) x 40" (W)' /></div>
-          <div><label className={labelCls}>Material & Finish</label><input name="materialAndFinish" defaultValue={defaultValues?.materialAndFinish?.join(', ')} className={inputCls} placeholder="e.g. Metal, Black finish (comma separated)" /></div>
-          <div><label className={labelCls}>Bulb Type</label><input name="bulbType" defaultValue={defaultValues?.bulbType?.join(', ')} className={inputCls} placeholder="e.g. E12, LED (comma separated)" /></div>
-          <div><label className={labelCls}>Style</label><input name="style" defaultValue={defaultValues?.style?.join(', ')} className={inputCls} placeholder="e.g. Traditional, Rustic (comma separated)" /></div>
+        <div className="bg-surface-muted/20 p-6 border border-border space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-1 h-4 bg-accent"></div>
+                <h4 className="font-mono text-[10px] uppercase tracking-widest text-primary">Core Attributes</h4>
+              </div>
+              <div className="space-y-3">
+                <div><label className={labelCls}>Material & Finish</label><input name="materialAndFinish" defaultValue={defaultValues?.materialAndFinish?.join(', ')} className={inputCls} placeholder="e.g. Brass, Matte Black" /></div>
+                <div><label className={labelCls}>Bulb Type</label><input name="bulbType" defaultValue={defaultValues?.bulbType?.join(', ')} className={inputCls} placeholder="e.g. E14, Integrated LED" /></div>
+                <div><label className={labelCls}>Design Style</label><input name="style" defaultValue={defaultValues?.style?.join(', ')} className={inputCls} placeholder="e.g. Contemporary, Art Deco" /></div>
+              </div>
+            </div>
+
+            <div className="md:col-span-2 space-y-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-1 h-4 bg-accent"></div>
+                <h4 className="font-mono text-[10px] uppercase tracking-widest text-primary">Physical Dimensions (Display)</h4>
+              </div>
+              <div className="grid grid-cols-3 gap-6 bg-background/50 p-4 border border-border">
+                <div>
+                  <label className={labelCls}>Height (in)</label>
+                  <div className="relative">
+                    <input type="number" step="0.1" name="actualHeight" defaultValue={defaultValues?.actualHeight} className={`${inputCls} !pr-8`} placeholder="0.0" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[10px] text-muted">"</span>
+                  </div>
+                </div>
+                <div>
+                  <label className={labelCls}>Width (in)</label>
+                  <div className="relative">
+                    <input type="number" step="0.1" name="actualWidth" defaultValue={defaultValues?.actualWidth} className={`${inputCls} !pr-8`} placeholder="0.0" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[10px] text-muted">"</span>
+                  </div>
+                </div>
+                <div>
+                  <label className={labelCls}>Depth (in)</label>
+                  <div className="relative">
+                    <input type="number" step="0.1" name="actualDepth" defaultValue={defaultValues?.actualDepth} className={`${inputCls} !pr-8`} placeholder="Optional" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[10px] text-muted">"</span>
+                  </div>
+                </div>
+                <p className="col-span-3 font-mono text-[8px] text-muted uppercase tracking-widest">Note: Depth is optional. If left blank, it will be hidden on the storefront.</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -231,10 +285,12 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
             </button>
           </div>
           {specs.map((spec, i) => (
-            <div key={i} className="flex gap-3 items-center">
-              <input value={spec.key} onChange={e => updateSpec(i, 'key', e.target.value)} placeholder="Key (e.g. Material)" className={`${inputCls} w-1/3`} />
-              <input value={spec.value} onChange={e => updateSpec(i, 'value', e.target.value)} placeholder="Value (e.g. Brass)" className={`${inputCls} flex-1`} />
-              <button type="button" onClick={() => removeSpec(i)} className="text-red-400/60 hover:text-red-400 font-mono text-[16px] px-2 flex-shrink-0">×</button>
+            <div key={i} className="flex gap-3 items-center animate-in fade-in slide-in-from-left-2 duration-200">
+              <input value={spec.key} onChange={e => updateSpec(i, 'key', e.target.value)} placeholder="Key (e.g. Finish)" className={`${inputCls} w-1/4 !py-2 !text-[12px]`} />
+              <input value={spec.value} onChange={e => updateSpec(i, 'value', e.target.value)} placeholder="Value (e.g. Polished Brass)" className={`${inputCls} flex-1 !py-2 !text-[12px]`} />
+              <button type="button" onClick={() => removeSpec(i)} className="btn-ghost !text-red-400 hover:!bg-red-400/10 !p-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
             </div>
           ))}
           {specs.length === 0 && <p className="text-muted font-mono text-[11px]">No specs yet — click "Add Spec" to add filterable attributes like Material, Finish, Diameter, etc.</p>}
@@ -281,11 +337,18 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
                   <div><label className={labelCls}>Stock Qty</label><input type="number" value={v.stockQuantity} onChange={e => updateVariant(i, 'stockQuantity', e.target.value)} className={inputCls} /></div>
                   <div><label className={labelCls}>D2C Price Override (₹)</label><input type="number" step="0.01" value={v.d2cPrice} onChange={e => updateVariant(i, 'd2cPrice', e.target.value)} placeholder="Leave blank to inherit" className={inputCls} /></div>
                   <div><label className={labelCls}>MRP Override (₹)</label><input type="number" step="0.01" value={v.mrp} onChange={e => updateVariant(i, 'mrp', e.target.value)} placeholder="Leave blank to inherit" className={inputCls} /></div>
-                  <div className="grid grid-cols-4 gap-4 col-span-3">
+                  <div className="grid grid-cols-4 gap-4 col-span-3 bg-surface-muted/30 p-3 border border-border">
+                    <div className="col-span-4 font-mono text-[8px] uppercase tracking-widest text-muted mb-2">Shipping Dimensions (cm)</div>
                     <div><label className={labelCls}>Weight (kg)</label><input type="number" step="0.01" value={v.weight} onChange={e => updateVariant(i, 'weight', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
                     <div><label className={labelCls}>Length (cm)</label><input type="number" step="0.1" value={v.length} onChange={e => updateVariant(i, 'length', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
                     <div><label className={labelCls}>Breadth (cm)</label><input type="number" step="0.1" value={v.breadth} onChange={e => updateVariant(i, 'breadth', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
                     <div><label className={labelCls}>Height (cm)</label><input type="number" step="0.1" value={v.height} onChange={e => updateVariant(i, 'height', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 col-span-3 bg-accent/5 p-3 border border-accent/10">
+                    <div className="col-span-3 font-mono text-[8px] uppercase tracking-widest text-accent mb-2">Actual Product Dimensions (in)</div>
+                    <div><label className={labelCls}>Height (in)</label><input type="number" step="0.1" value={v.actualHeight} onChange={e => updateVariant(i, 'actualHeight', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
+                    <div><label className={labelCls}>Width (in)</label><input type="number" step="0.1" value={v.actualWidth} onChange={e => updateVariant(i, 'actualWidth', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
+                    <div><label className={labelCls}>Depth (in)</label><input type="number" step="0.1" value={v.actualDepth} onChange={e => updateVariant(i, 'actualDepth', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
                   </div>
                   <div className="col-span-3">
                     <label className={labelCls}>Variant Images</label>

@@ -1,6 +1,7 @@
 import { prisma } from '../../lib/prisma';
 import Link from 'next/link';
 import OrderActionsClient from './OrderActionsClient';
+import ClickableRow from '@/components/ClickableRow';
 
 export const dynamic = 'force-dynamic';
 
@@ -91,7 +92,7 @@ export default async function OrdersPage() {
                 const typeColor = isRFQ ? 'text-[#c084fc] border-[#c084fc]/30 bg-[#c084fc]/10' : 'text-[#60a5fa] border-[#60a5fa]/30 bg-[#60a5fa]/10';
                 
                 return (
-                  <tr key={record.id} className="hover:bg-surface-muted transition-colors">
+                  <ClickableRow key={record.id} href={`/orders/${record.id}`}>
                     <td className="px-8 py-5 font-mono text-[12px] text-primary">{record.displayId}</td>
                     <td className="px-8 py-5 font-body text-[13px] text-secondary">
                       {record.date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
@@ -118,11 +119,11 @@ export default async function OrdersPage() {
                       </span>
                     </td>
                     <td className="px-8 py-5 text-right">
-                      <Link href={`/orders/${record.id}`} className="font-mono text-[10px] uppercase tracking-[0.15em] text-accent hover:text-white transition-colors">
+                      <Link href={`/orders/${record.id}`} className="btn-ghost">
                         {isRFQ ? 'Review' : 'View Details →'}
                       </Link>
                     </td>
-                  </tr>
+                  </ClickableRow>
                 );
               })}
               
