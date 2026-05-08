@@ -16,6 +16,9 @@ type Variant = {
   length: string;
   breadth: string;
   height: string;
+  actualHeight: string;
+  actualWidth: string;
+  actualDepth: string;
 };
 type Spec = { key: string; value: string };
 
@@ -50,6 +53,9 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
       length: String(v.length || ''),
       breadth: String(v.breadth || ''),
       height: String(v.height || ''),
+      actualHeight: String(v.actualHeight || ''),
+      actualWidth: String(v.actualWidth || ''),
+      actualDepth: String(v.actualDepth || ''),
     })) || []
   );
   const addVariant = () => setVariants(prev => [...prev, { 
@@ -62,7 +68,10 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
     weight: '',
     length: '',
     breadth: '',
-    height: ''
+    height: '',
+    actualHeight: '',
+    actualWidth: '',
+    actualDepth: ''
   }]);
   const updateVariant = (i: number, field: keyof Variant, val: string) => setVariants(prev => prev.map((v, idx) => idx === i ? { ...v, [field]: val } : v));
   const removeVariant = (i: number) => setVariants(prev => prev.filter((_, idx) => idx !== i));
@@ -100,7 +109,9 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
       gstRate: parseFloat(fd.get('gstRate') as string) || 18,
       hsnCode: fd.get('hsnCode'),
       bisCertification: fd.get('bisCertification'),
-      dimensions: fd.get('dimensions'),
+      actualHeight: fd.get('actualHeight') ? parseFloat(fd.get('actualHeight') as string) : null,
+      actualWidth: fd.get('actualWidth') ? parseFloat(fd.get('actualWidth') as string) : null,
+      actualDepth: fd.get('actualDepth') ? parseFloat(fd.get('actualDepth') as string) : null,
       materialAndFinish: fd.get('materialAndFinish') ? (fd.get('materialAndFinish') as string).split(',').map(s => s.trim()).filter(Boolean) : [],
       bulbType: fd.get('bulbType') ? (fd.get('bulbType') as string).split(',').map(s => s.trim()).filter(Boolean) : [],
       style: fd.get('style') ? (fd.get('style') as string).split(',').map(s => s.trim()).filter(Boolean) : [],
@@ -116,6 +127,9 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
         length: v.length ? parseFloat(v.length) : null,
         breadth: v.breadth ? parseFloat(v.breadth) : null,
         height: v.height ? parseFloat(v.height) : null,
+        actualHeight: (v.actualHeight && v.actualHeight.trim()) ? parseFloat(v.actualHeight) : null,
+        actualWidth: (v.actualWidth && v.actualWidth.trim()) ? parseFloat(v.actualWidth) : null,
+        actualDepth: (v.actualDepth && v.actualDepth.trim()) ? parseFloat(v.actualDepth) : null,
       })),
       specs: specs.reduce((acc: any, s) => { if (s.key) acc[s.key] = s.value; return acc; }, {}),
     };
@@ -217,10 +231,15 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
         </div>
 
         <div className="grid grid-cols-4 gap-6 mb-6">
-          <div><label className={labelCls}>Dimensions</label><input name="dimensions" defaultValue={defaultValues?.dimensions} className={inputCls} placeholder='e.g. 39" (H) x 40" (W)' /></div>
-          <div><label className={labelCls}>Material & Finish</label><input name="materialAndFinish" defaultValue={defaultValues?.materialAndFinish?.join(', ')} className={inputCls} placeholder="e.g. Metal, Black finish (comma separated)" /></div>
-          <div><label className={labelCls}>Bulb Type</label><input name="bulbType" defaultValue={defaultValues?.bulbType?.join(', ')} className={inputCls} placeholder="e.g. E12, LED (comma separated)" /></div>
-          <div><label className={labelCls}>Style</label><input name="style" defaultValue={defaultValues?.style?.join(', ')} className={inputCls} placeholder="e.g. Traditional, Rustic (comma separated)" /></div>
+          <div><label className={labelCls}>Actual Height (in)</label><input type="number" step="0.1" name="actualHeight" defaultValue={defaultValues?.actualHeight} className={inputCls} placeholder='e.g. 39"' /></div>
+          <div><label className={labelCls}>Actual Width (in)</label><input type="number" step="0.1" name="actualWidth" defaultValue={defaultValues?.actualWidth} className={inputCls} placeholder='e.g. 40"' /></div>
+          <div><label className={labelCls}>Actual Depth (in)</label><input type="number" step="0.1" name="actualDepth" defaultValue={defaultValues?.actualDepth} className={inputCls} placeholder='e.g. 12"' /></div>
+          <div><label className={labelCls}>Material & Finish</label><input name="materialAndFinish" defaultValue={defaultValues?.materialAndFinish?.join(', ')} className={inputCls} placeholder="e.g. Metal, Black finish" /></div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-6 mb-6">
+          <div><label className={labelCls}>Bulb Type</label><input name="bulbType" defaultValue={defaultValues?.bulbType?.join(', ')} className={inputCls} placeholder="e.g. E12, LED" /></div>
+          <div><label className={labelCls}>Style</label><input name="style" defaultValue={defaultValues?.style?.join(', ')} className={inputCls} placeholder="e.g. Traditional, Rustic" /></div>
         </div>
 
         <div className="space-y-2">
@@ -281,11 +300,18 @@ export default function ProductFormClient({ categories, spaces, defaultValues, m
                   <div><label className={labelCls}>Stock Qty</label><input type="number" value={v.stockQuantity} onChange={e => updateVariant(i, 'stockQuantity', e.target.value)} className={inputCls} /></div>
                   <div><label className={labelCls}>D2C Price Override (₹)</label><input type="number" step="0.01" value={v.d2cPrice} onChange={e => updateVariant(i, 'd2cPrice', e.target.value)} placeholder="Leave blank to inherit" className={inputCls} /></div>
                   <div><label className={labelCls}>MRP Override (₹)</label><input type="number" step="0.01" value={v.mrp} onChange={e => updateVariant(i, 'mrp', e.target.value)} placeholder="Leave blank to inherit" className={inputCls} /></div>
-                  <div className="grid grid-cols-4 gap-4 col-span-3">
+                  <div className="grid grid-cols-4 gap-4 col-span-3 bg-surface-muted/30 p-3 border border-border">
+                    <div className="col-span-4 font-mono text-[8px] uppercase tracking-widest text-muted mb-2">Shipping Dimensions (cm)</div>
                     <div><label className={labelCls}>Weight (kg)</label><input type="number" step="0.01" value={v.weight} onChange={e => updateVariant(i, 'weight', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
                     <div><label className={labelCls}>Length (cm)</label><input type="number" step="0.1" value={v.length} onChange={e => updateVariant(i, 'length', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
                     <div><label className={labelCls}>Breadth (cm)</label><input type="number" step="0.1" value={v.breadth} onChange={e => updateVariant(i, 'breadth', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
                     <div><label className={labelCls}>Height (cm)</label><input type="number" step="0.1" value={v.height} onChange={e => updateVariant(i, 'height', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 col-span-3 bg-accent/5 p-3 border border-accent/10">
+                    <div className="col-span-3 font-mono text-[8px] uppercase tracking-widest text-accent mb-2">Actual Product Dimensions (in)</div>
+                    <div><label className={labelCls}>Height (in)</label><input type="number" step="0.1" value={v.actualHeight} onChange={e => updateVariant(i, 'actualHeight', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
+                    <div><label className={labelCls}>Width (in)</label><input type="number" step="0.1" value={v.actualWidth} onChange={e => updateVariant(i, 'actualWidth', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
+                    <div><label className={labelCls}>Depth (in)</label><input type="number" step="0.1" value={v.actualDepth} onChange={e => updateVariant(i, 'actualDepth', e.target.value)} className={inputCls} placeholder="Inherit" /></div>
                   </div>
                   <div className="col-span-3">
                     <label className={labelCls}>Variant Images</label>

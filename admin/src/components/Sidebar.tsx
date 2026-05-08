@@ -67,21 +67,33 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
         </div>
 
         <nav className="flex-1 px-4 py-8 space-y-1 overflow-y-auto">
-          {links.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              onClick={onClose}
-              className="flex items-center justify-between px-4 py-3 text-muted hover:text-accent border border-transparent hover:border-border hover:bg-surface-muted transition-all duration-200 font-mono text-[10px] tracking-[0.12em] uppercase"
-            >
-              <span>{link.name}</span>
-              {link.badge !== null && link.badge !== undefined && link.badge > 0 && (
-                <span className="bg-[#f59e0b] text-black font-mono text-[9px] font-medium px-1.5 py-0.5 min-w-[20px] text-center">
-                  {link.badge}
-                </span>
-              )}
-            </Link>
-          ))}
+          {links.map((link) => {
+            const isActive = link.href === '/' 
+              ? pathname === '/' 
+              : pathname.startsWith(link.href);
+              
+            return (
+              <Link
+                key={link.name}
+                href={link.href}
+                onClick={onClose}
+                className={`
+                  flex items-center justify-between px-4 py-3 font-mono text-[10px] tracking-[0.12em] uppercase transition-all duration-200 border
+                  ${isActive 
+                    ? 'text-white border-accent/40 bg-surface-muted' 
+                    : 'text-muted hover:text-accent border-transparent hover:border-border hover:bg-surface-muted'
+                  }
+                `}
+              >
+                <span>{link.name}</span>
+                {link.badge !== null && link.badge !== undefined && link.badge > 0 && (
+                  <span className="bg-[#f59e0b] text-black font-mono text-[9px] font-medium px-1.5 py-0.5 min-w-[20px] text-center">
+                    {link.badge}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="p-6 border-t border-border bg-background">

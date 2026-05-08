@@ -1,6 +1,7 @@
 import { prisma } from '../../lib/prisma';
 import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
+import ClickableRow from '@/components/ClickableRow';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,7 +40,7 @@ export default async function PagesDashboard() {
             </thead>
             <tbody className="divide-y divide-border/50">
               {pages.map((page) => (
-                <tr key={page.id} className="hover:bg-surface-muted transition-colors">
+                <ClickableRow key={page.id} href={`/pages/${page.id}`}>
                   <td className="px-8 py-5">
                     <div className="font-body text-[14px] text-primary font-medium">{page.title}</div>
                   </td>
@@ -58,14 +59,14 @@ export default async function PagesDashboard() {
                     {page.updatedAt.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                   </td>
                   <td className="px-8 py-5 text-right flex justify-end gap-3">
-                    <Link href={`/pages/${page.id}`} className="font-mono text-[10px] uppercase tracking-[0.15em] text-accent hover:text-white transition-colors">
+                    <Link href={`/pages/${page.id}`} className="btn-ghost">
                       Edit
                     </Link>
-                    <a href={`${process.env.NEXT_PUBLIC_STOREFRONT_URL || 'http://localhost:3001'}/${page.slug}`} target="_blank" rel="noreferrer" className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted hover:text-white transition-colors">
+                    <a href={`${process.env.NEXT_PUBLIC_STOREFRONT_URL || 'http://localhost:3001'}/${page.slug}`} target="_blank" rel="noreferrer" className="btn-ghost !text-muted">
                       View
                     </a>
                   </td>
-                </tr>
+                </ClickableRow>
               ))}
               
               {pages.length === 0 && (

@@ -2,6 +2,7 @@ import { prisma } from '../../lib/prisma';
 import Link from 'next/link';
 import SearchInput from '@/components/SearchInput';
 import SelectFilter from '@/components/SelectFilter';
+import ClickableRow from '@/components/ClickableRow';
 
 export const dynamic = 'force-dynamic';
 
@@ -98,7 +99,7 @@ export default async function ProductsPage({
                 const isOutOfStock = product.stockQuantity <= 0;
                 
                 return (
-                  <tr key={product.id} className="hover:bg-surface-muted transition-colors">
+                  <ClickableRow key={product.id} href={`/products/${product.id}/edit`}>
                     <td className="px-8 py-5">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-12 bg-background border border-border flex items-center justify-center font-mono text-[8px] text-muted tracking-widest text-center opacity-70">
@@ -130,9 +131,9 @@ export default async function ProductsPage({
                       )}
                     </td>
                     <td className="px-8 py-5 text-right">
-                      <Link prefetch={false} href={`/products/${product.id}/edit`} className="font-mono text-[10px] uppercase tracking-[0.15em] text-accent hover:text-accent-hover transition-colors">Edit</Link>
+                      <Link prefetch={false} href={`/products/${product.id}/edit`} className="btn-ghost">Edit</Link>
                     </td>
-                  </tr>
+                  </ClickableRow>
                 );
               })}
               

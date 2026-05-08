@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import ClickableRow from '@/components/ClickableRow';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +51,7 @@ export default async function RFQsPage() {
               </tr>
             ) : (
               rfqs.map((rfq: any) => (
-                <tr key={rfq.id} className="border-b border-border hover:bg-[#1a1a1f] transition-colors">
+                <ClickableRow key={rfq.id} href={`/rfqs/${rfq.id}`} className="border-b border-border hover:bg-[#1a1a1f]">
                   <td className="py-4 px-6">
                     <div className="font-mono text-[12px] text-primary mb-1">{rfq.rfqNumber}</div>
                     <div className="font-body text-[12px] text-muted">{new Date(rfq.createdAt).toLocaleDateString()}</div>
@@ -77,7 +78,7 @@ export default async function RFQsPage() {
                       View Request →
                     </Link>
                   </td>
-                </tr>
+                </ClickableRow>
               ))
             )}
           </tbody>
